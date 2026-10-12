@@ -6,7 +6,8 @@ import Lapor from '../sekolah/Lapor.jsx';
 import { TABS_PUSKESMAS } from '../tabs.js';
 import { useMuat, useSesi } from '../../lib/sesi.jsx';
 import { jam, tanggal } from '../../lib/format.js';
-import { AppBar, Halaman, Hero, Ikon, InfoBatch, ItemBatch, Kosong, Pesan, Riwayat, Skeleton, TabBar, useKelayakan } from '../../components/ui.jsx';
+import { AppBar, Halaman, Hero, Ikon, InfoBatch, ItemBatch, Kosong, Pesan, Ringkasan, Riwayat, Skeleton, TabBar, useKelayakan } from '../../components/ui.jsx';
+import BuktiBatch from '../../components/BuktiBatch.jsx';
 import { PemindaiQR } from '../../components/Qr.jsx';
 
 function Beranda() {
@@ -18,11 +19,21 @@ function Beranda() {
   const semua = (data || []).map((b) => ({ b, k: nilaiK(b) })).sort((p, q) => q.b.id - p.b.id);
   const insiden = semua.filter((x) => x.b.jumlahInsiden > 0);
   const disajikan = semua.filter((x) => x.b.status === 4 && !x.b.jumlahInsiden);
+  const ditolak = semua.filter((x) => x.b.status === 5);
   return (
     <Halaman>
       <AppBar judul={profil.organisasi} eyebrow="Petugas Puskesmas" />
-      <div className="content">
-        <div className="date">{tanggal(now)} · pukul {jam(now)}</div>
+      <div className="content operational-content">
+        <section className="dashboard-intro role-intro" aria-labelledby="judul-puskesmas">
+          <div><span className="section-kicker">Pemantauan kesehatan</span><h1 id="judul-puskesmas">Insiden dan keamanan batch</h1></div>
+          <p>Tinjau laporan berdasarkan sekolah, waktu kejadian, dan bukti pencatatan blockchain.</p>
+          <div className="date"><Ikon n="clock" />{tanggal(now)} · pukul {jam(now)}</div>
+        </section>
+        {data && <Ringkasan items={[
+          { label: 'Laporan insiden', value: insiden.reduce((n, x) => n + x.b.jumlahInsiden, 0), help: `${insiden.length} batch terdampak`, nada: insiden.length ? 'bad' : 'ok' },
+          { label: 'Sudah disajikan', value: semua.filter((x) => x.b.status === 4).length, help: 'Tercatat selesai', nada: 'ok' },
+          { label: 'Ditolak sekolah', value: ditolak.length, help: 'Tidak dibagikan', nada: ditolak.length ? 'warn' : '' },
+        ]} />}
         <Link to="/puskesmas/pindai" className="btn primary block"><Ikon n="search" />Cari batch (QR atau kode)</Link>
         {loading && !data && <Skeleton n={2} />}
         {error && <Pesan>{error.message}</Pesan>}
@@ -62,9 +73,9 @@ function Detail() {
   return (
     <Halaman>
       <AppBar judul={`Batch ${b.kode}`} eyebrow={b.sekolah} kembali="/puskesmas" />
-      <div className="content">
-        <Hero b={b} k={nilaiK(b)} />
-        <section className="card">
+      <div className="content detail-content">
+        <div className="detail-primary"><Hero b={b} k={nilaiK(b)} />
+        <section className="card incident-card">
           <h3>Laporan insiden ({laporan.length})</h3>
           {laporan.length ? (
             <ol className="tl">
@@ -74,9 +85,8 @@ function Detail() {
               ))}
             </ol>
           ) : <p className="muted" style={{ margin: 0 }}>Belum ada laporan untuk batch ini.</p>}
-        </section>
-        <InfoBatch b={b} />
-        <Riwayat b={b} />
+        </section></div>
+        <div className="detail-secondary"><InfoBatch b={b} /><Riwayat b={b} /><BuktiBatch kode={b.kode} /></div>
       </div>
       {b.status >= 3 && <div className="actions"><Link to={`/puskesmas/lapor?kode=${b.kode}`} className="btn primary"><Ikon n="flag" />Laporkan insiden</Link></div>}
     </Halaman>

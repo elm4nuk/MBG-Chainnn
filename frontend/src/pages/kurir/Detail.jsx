@@ -5,6 +5,7 @@ import { useMuat, useSesi, useTx } from '../../lib/sesi.jsx';
 import { jam } from '../../lib/format.js';
 import { AppBar, Halaman, Hero, Ikon, InfoBatch, Kosong, Overlay, Pesan, Riwayat, Skeleton, useKelayakan } from '../../components/ui.jsx';
 import TxLayar from '../../components/TxLayar.jsx';
+import BuktiBatch from '../../components/BuktiBatch.jsx';
 
 export default function DetailKurir() {
   const { kode } = useParams();
@@ -34,14 +35,14 @@ export default function DetailKurir() {
   return (
     <Halaman>
       <AppBar judul={`Batch ${b.kode}`} eyebrow={`${b.dapur} → ${b.sekolah}`} kembali="/kurir" />
-      <div className="content">
-        <Hero b={b} k={k} />
+      <div className="content detail-content">
+        <div className="detail-primary"><Hero b={b} k={k} />
         {b.status === 0 && <Pesan jenis="info" ikon="clock">Batch belum selesai dimasak. Tunggu dapur mencatat selesai masak.</Pesan>}
         {b.status === 2 && saya && <Pesan jenis="info" ikon="truck">Antar ke {b.sekolah}. PIC sekolah mencatat penerimaan saat batch tiba.</Pesan>}
         {b.status === 2 && !saya && <Pesan>Batch ini sedang diantar kurir lain.</Pesan>}
         {b.status === 2 && k.kode === 3 && <Pesan>Batch sudah melewati batas 4 jam. Sekolah akan menolaknya; tetap serahkan agar keterlambatan tercatat.</Pesan>}
-        <InfoBatch b={b} />
-        <Riwayat b={b} />
+        </div>
+        <div className="detail-secondary"><InfoBatch b={b} /><Riwayat b={b} /><BuktiBatch kode={b.kode} /></div>
       </div>
       {b.status === 1 && (
         <div className="actions"><button type="button" className="btn primary" onClick={() => setTanya(true)}><Ikon n="truck" />Ambil batch</button></div>

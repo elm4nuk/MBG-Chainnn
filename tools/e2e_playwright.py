@@ -16,8 +16,10 @@ OUT = pathlib.Path(__file__).parent / 'shots'
 OUT.mkdir(exist_ok=True)
 RPC = os.environ.get('MBG_RPC', 'http://127.0.0.1:8545')
 HASIL = []
-PHONE = dict(viewport={'width': 402, 'height': 874}, device_scale_factor=2)
-DESK = dict(viewport={'width': 1180, 'height': 1040}, device_scale_factor=2)
+PHONE = dict(viewport={'width': 375, 'height': 812}, device_scale_factor=2)
+TABLET = {'width': 768, 'height': 1024}
+LAPTOP = {'width': 1024, 'height': 900}
+DESK = dict(viewport={'width': 1440, 'height': 1000}, device_scale_factor=1)
 
 
 def rpc(method, params=None):
@@ -310,11 +312,67 @@ async def publik(browser):
     await ctx.close()
 
 
+async def audit_responsif(browser):
+    """Audit visual/read-only sesudah alur transaksi: semua peran pada empat breakpoint."""
+    ukuran = [PHONE['viewport'], TABLET, LAPTOP, DESK['viewport']]
+    peran = [
+        ('sekolah', 'PIC-RI03-021', '/#/sekolah', 'Pantau penerimaan dan penyajian'),
+        ('dapur', 'SPPG-CB-007', '/#/dapur', 'Produksi dan pengiriman batch'),
+        ('kurir', 'KUR-MLC-012', '/#/kurir', 'Pengambilan dan pengantaran'),
+        ('puskesmas', 'PKM-CKG-002', '/#/puskesmas', 'Insiden dan keamanan batch'),
+        ('admin', 'ADM-BGN-001', '/#/admin', 'Kelola organisasi MBG'),
+    ]
+
+    # Login publik: dua komposisi utama.
+    ctx = await browser.new_context(**DESK); page = await ctx.new_page()
+    galat_console = []
+    page.on('pageerror', lambda e: galat_console.append(str(e)))
+    page.on('console', lambda m: galat_console.append(m.text) if m.type == 'error' else None)
+    await page.goto(BASE + '/#/masuk'); await page.get_by_role('heading', name='Lacak perjalanan makanan, dari dapur sampai disajikan.').wait_for()
+    await shot(page, 'redesign_login_desktop', full=True)
+    await page.set_viewport_size(PHONE['viewport']); await shot(page, 'redesign_login_mobile', full=True)
+    catat('Login responsif desktop dan mobile tanpa error console', not galat_console, '; '.join(galat_console[:2]))
+    await ctx.close()
+
+    for nama, akun, rute, heading in peran:
+        ctx, page = await masuk(browser, akun, DESK)
+        galat_console = []
+        page.on('pageerror', lambda e, x=galat_console: x.append(str(e)))
+        page.on('console', lambda m, x=galat_console: x.append(m.text) if m.type == 'error' else None)
+        await page.goto(BASE + rute)
+        await page.get_by_role('heading', name=heading).wait_for(timeout=15000)
+        hasil = []
+        for vp in ukuran:
+            await page.set_viewport_size(vp); await page.wait_for_timeout(120)
+            lebar = await page.evaluate('document.documentElement.scrollWidth')
+            hasil.append(lebar <= vp['width'])
+            if vp['width'] == 1440: await shot(page, f'redesign_{nama}_desktop', full=True)
+            if vp['width'] == 375: await shot(page, f'redesign_{nama}_mobile', full=True)
+        catat(f'{nama.title()}: layout 375/768/1024/1440 tanpa overflow atau error console', all(hasil) and not galat_console,
+              '' if not galat_console else '; '.join(galat_console[:2]))
+        await ctx.close()
+
+    # Pengawas dan detail batch publik memakai data/logic yang sama tanpa sesi login.
+    ctx = await browser.new_context(**DESK); page = await ctx.new_page()
+    galat_console = []
+    page.on('pageerror', lambda e: galat_console.append(str(e)))
+    page.on('console', lambda m: galat_console.append(m.text) if m.type == 'error' else None)
+    for rute, nama, tunggu in [('/#/pantau', 'pengawas', 'Status distribusi batch'), ('/#/verifikasi/B-0005', 'detail_batch', 'Bukti di blockchain')]:
+        await page.goto(BASE + rute); await page.get_by_role('heading', name=tunggu).wait_for(timeout=15000)
+        for vp in (DESK['viewport'], PHONE['viewport']):
+            await page.set_viewport_size(vp); await page.wait_for_timeout(120)
+            await shot(page, f'redesign_{nama}_{"desktop" if vp["width"] == 1440 else "mobile"}', full=True)
+            lebar = await page.evaluate('document.documentElement.scrollWidth')
+            if lebar > vp['width']: galat_console.append(f'{nama} overflow {lebar}px pada {vp["width"]}px')
+    catat('Pengawas dan detail batch responsif tanpa error console', not galat_console, '; '.join(galat_console[:2]))
+    await ctx.close()
+
+
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch()
         t0 = time.time()
-        for f in (sekolah, dapur_kurir, puskesmas, admin, publik):
+        for f in (sekolah, dapur_kurir, puskesmas, admin, publik, audit_responsif):
             try:
                 await f(b)
             except Exception as e:  # noqa: BLE001

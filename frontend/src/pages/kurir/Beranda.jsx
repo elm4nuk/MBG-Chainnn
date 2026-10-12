@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useMuat, useSesi } from '../../lib/sesi.jsx';
 import { jam, tanggal } from '../../lib/format.js';
-import { AppBar, Halaman, Ikon, ItemBatch, Kosong, Pesan, Skeleton, TabBar, useKelayakan } from '../../components/ui.jsx';
+import { AppBar, Halaman, Ikon, ItemBatch, Kosong, Pesan, Ringkasan, Skeleton, TabBar, useKelayakan } from '../../components/ui.jsx';
 import { TABS_KURIR } from '../tabs.js';
 
 export default function BerandaKurir() {
@@ -21,8 +21,17 @@ export default function BerandaKurir() {
   return (
     <Halaman>
       <AppBar judul={profil.nama} eyebrow={`Kurir · ${profil.organisasi}`} />
-      <div className="content">
-        <div className="date">{tanggal(now)} · pukul {jam(now)}</div>
+      <div className="content operational-content">
+        <section className="dashboard-intro role-intro" aria-labelledby="judul-kurir">
+          <div><span className="section-kicker">Operasional kurir</span><h1 id="judul-kurir">Pengambilan dan pengantaran</h1></div>
+          <p>Dahulukan batch dengan sisa waktu paling sedikit dan pastikan tujuan sekolah terbaca sebelum mengambil.</p>
+          <div className="date"><Ikon n="clock" />{tanggal(now)} · pukul {jam(now)}</div>
+        </section>
+        {data && <Ringkasan items={[
+          { label: 'Sedang diantar', value: antar.length, help: 'Tanggung jawab Anda', nada: antar.length ? 'warn' : 'ok' },
+          { label: 'Siap diambil', value: siap.length, help: 'Di dapur SPPG', nada: 'pend' },
+          { label: 'Sudah diserahkan', value: sudah.length, help: 'Riwayat terbaru', nada: 'ok' },
+        ]} />}
         <Link to="/kurir/pindai" className="btn primary block"><Ikon n="qr" />Pindai QR untuk mengambil</Link>
         {loading && !data && <Skeleton n={3} teks="Memuat batch dari blockchain…" />}
         {error && <Pesan>{error.message}</Pesan>}

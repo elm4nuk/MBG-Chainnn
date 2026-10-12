@@ -28,17 +28,16 @@ function DetailPublik({ kode, kembali }) {
   const k = nilaiK(b);
   const aman = b.status === 4;
   return (
-    <div className="content">
-      <Pesan jenis={aman ? 'info' : b.status === 5 ? 'bad' : 'info'} ikon="shield">
+    <div className="content detail-content">
+      <div className="detail-primary"><Pesan jenis={aman ? 'info' : b.status === 5 ? 'bad' : 'info'} ikon="shield">
         {aman && `Batch ini disajikan pukul ${jam(b.riwayat.at(-1)?.waktu)}, sebelum batas konsumsi ${jam(k.batas)}.`}
         {b.status === 5 && `Batch ini ditolak sekolah (${b.alasanTolak}) dan tidak dibagikan kepada siswa.`}
         {b.status < 4 && 'Batch ini masih dalam proses. Data di bawah dibaca langsung dari smart contract.'}
       </Pesan>
       <Hero b={b} k={k} />
       {b.jumlahInsiden > 0 && <Pesan jenis="warn" ikon="flag">{b.jumlahInsiden} laporan insiden tercatat untuk batch ini.</Pesan>}
-      <InfoBatch b={b} />
-      <Riwayat b={b} />
-      <BuktiBlockchain jejak={jejak} />
+      </div>
+      <div className="detail-secondary"><InfoBatch b={b} /><Riwayat b={b} /><BuktiBlockchain jejak={jejak} /></div>
     </div>
   );
 }
@@ -51,14 +50,14 @@ export default function Verifikasi() {
 
   if (!kode) {
     return (
-      <Halaman>
+      <Halaman lebar>
         <AppBar judul="Verifikasi batch" eyebrow="Tanpa login" kembali={keluar} kamera />
         <PemindaiQR onKode={(k) => nav(`/verifikasi/${k}`)} petunjuk="Arahkan kamera ke QR pada wadah makanan." />
       </Halaman>
     );
   }
   return (
-    <Halaman>
+    <Halaman lebar>
       <AppBar judul={`Batch ${kode}`} eyebrow="Verifikasi publik" kembali="/verifikasi" />
       <DetailPublik kode={kode} kembali={() => nav('/verifikasi')} />
     </Halaman>

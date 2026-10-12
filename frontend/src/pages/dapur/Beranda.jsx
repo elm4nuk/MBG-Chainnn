@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useMuat, useSesi } from '../../lib/sesi.jsx';
 import { jam, tanggal } from '../../lib/format.js';
-import { AppBar, Halaman, Ikon, ItemBatch, Kosong, Pesan, Skeleton, TabBar, useKelayakan } from '../../components/ui.jsx';
+import { AppBar, Halaman, Ikon, ItemBatch, Kosong, Pesan, Ringkasan, Skeleton, TabBar, useKelayakan } from '../../components/ui.jsx';
 import { TABS_DAPUR } from '../tabs.js';
 
 function Bagian({ judul, sub, isi, meta }) {
@@ -29,9 +29,20 @@ export default function BerandaDapur() {
   return (
     <Halaman>
       <AppBar judul={profil.organisasi} eyebrow="Petugas dapur" />
-      <div className="content">
-        <div className="date">{tanggal(now)} · pukul {jam(now)}</div>
+      <div className="content operational-content">
+        <section className="dashboard-intro role-intro" aria-labelledby="judul-dapur">
+          <div><span className="section-kicker">Operasional SPPG</span><h1 id="judul-dapur">Produksi dan pengiriman batch</h1></div>
+          <p>Daftarkan batch, catat selesai masak tepat waktu, dan pantau perjalanan makanan sampai sekolah.</p>
+          <div className="date"><Ikon n="clock" />{tanggal(now)} · pukul {jam(now)}</div>
+        </section>
+        {data && <Ringkasan items={[
+          { label: 'Belum dimasak', value: per([0]).length, help: 'Perlu tindakan', nada: per([0]).length ? 'warn' : 'ok' },
+          { label: 'Menunggu kurir', value: per([1]).length, help: 'Batas 4 jam berjalan', nada: 'pend' },
+          { label: 'Dalam perjalanan', value: per([2]).length, help: 'Menuju sekolah' },
+          { label: 'Selesai', value: per([4, 5]).length, help: 'Hasil akhir', nada: 'ok' },
+        ]} />}
         <Link to="/dapur/baru" className="btn primary block"><Ikon n="plus" />Daftarkan batch baru</Link>
+        <Pesan jenis="info" ikon="clock">Batas konsumsi empat jam dimulai saat selesai masak dicatat di blockchain.</Pesan>
         {loading && !data && <Skeleton n={3} teks="Memuat batch dapur dari blockchain…" />}
         {error && <Pesan>{error.message}</Pesan>}
         {data && !semua.length && <Kosong ikon="bowl" judul="Belum ada batch">Daftarkan batch untuk setiap sekolah tujuan, lalu tempel label QR pada wadahnya.</Kosong>}

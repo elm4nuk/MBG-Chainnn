@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMuat, useSesi } from '../../lib/sesi.jsx';
 import { durasi, jam, tanggal } from '../../lib/format.js';
-import { AppBar, Halaman, Ikon, ItemBatch, Kosong, Pesan, Skeleton, TabBar, useKelayakan } from '../../components/ui.jsx';
+import { AppBar, Halaman, Ikon, ItemBatch, Kosong, Pesan, Ringkasan, Skeleton, TabBar, useKelayakan } from '../../components/ui.jsx';
 import { TABS_SEKOLAH } from '../tabs.js';
 
 export default function BerandaSekolah() {
@@ -33,8 +33,19 @@ export default function BerandaSekolah() {
   return (
     <Halaman>
       <AppBar judul={profil.organisasi} eyebrow="PIC Sekolah" kanan={bel} />
-      <div className="content">
-        <div className="date">{tanggal(now)} · pukul {jam(now)}</div>
+      <div className="content operational-content">
+        <section className="dashboard-intro role-intro" aria-labelledby="judul-sekolah">
+          <div><span className="section-kicker">Operasional sekolah</span><h1 id="judul-sekolah">Pantau penerimaan dan penyajian</h1></div>
+          <p>Prioritaskan batch yang kedaluwarsa atau mendekati batas, lalu catat setiap tindakan di blockchain.</p>
+          <div className="date"><Ikon n="clock" />{tanggal(now)} · pukul {jam(now)}</div>
+        </section>
+        {data && <Ringkasan items={[
+          { label: 'Perlu diterima', value: datang.length, help: 'Kurir menuju sekolah', nada: 'pend' },
+          { label: 'Siap ditindak', value: diterima.length, help: 'Diterima sekolah', nada: diterima.length ? 'warn' : 'ok' },
+          { label: 'Di dapur', value: disiapkan.length, help: 'Sedang disiapkan' },
+          { label: 'Selesai', value: selesai.length, help: 'Disajikan atau ditolak', nada: 'ok' },
+        ]} />}
+        <div className="urgent-grid">
         {lewat && (
           <Link to={`/sekolah/batch/${lewat.b.kode}`} className="banner bad">
             <Ikon n="alert" /><div><b>{lewat.b.kode} lewat batas {durasi(lewat.k.lewat)}</b><span>Jangan disajikan. Tolak batch agar tercatat.</span></div><span className="chev"><Ikon n="chev" /></span>
@@ -45,6 +56,7 @@ export default function BerandaSekolah() {
             <Ikon n="clock" /><div><b>{mendesak.b.kode} tersisa {durasi(mendesak.k.sisa)}</b><span>Sajikan sekarang atau tolak batch.</span></div><span className="chev"><Ikon n="chev" /></span>
           </Link>
         )}
+        </div>
         <Link to="/sekolah/pindai" className="btn primary block"><Ikon n="qr" />Pindai QR batch</Link>
 
         {loading && !data && <Skeleton n={3} teks="Memuat batch sekolah dari blockchain…" />}

@@ -109,7 +109,7 @@ Data demo meniru skenario prototype Session 10: setelah `npm run seed`, B-0001 s
 ## Pengujian
 
 - `npm test`: 25 unit test untuk kontrak dan klien Web3.js, termasuk aturan 4 jam dengan memajukan jam blockchain.
-- `npm run test:e2e` (opsional): menyalakan chain uji terpisah di port 8546, deploy + seed, build + preview, lalu menjalankan 30 langkah Playwright untuk semua peran. Runner memulihkan berkas deployment demo dan menghentikan hanya proses uji miliknya. Termasuk pemeriksaan navigasi Admin, panel bukti transaksi, fokus dialog, dan dashboard mobile tanpa overflow horizontal. Prasyarat: `pip install playwright && playwright install chromium`.
+- `npm run test:e2e` (opsional): menyalakan chain uji terpisah di port 8546, deploy + seed, build + preview, lalu menjalankan 37 langkah Playwright untuk semua peran. Runner memulihkan berkas deployment demo dan menghentikan hanya proses uji miliknya. Termasuk pemeriksaan navigasi Admin, panel bukti transaksi, fokus dialog, error console, serta layout 375/768/1024/1440 tanpa overflow horizontal. Screenshot audit responsif disimpan lokal di `tools/shots/`. Prasyarat: `pip install playwright && playwright install chromium`.
 
 ## Deploy ke testnet Sepolia (opsional)
 

@@ -5,6 +5,7 @@ import { useMuat, useSesi, useTx } from '../../lib/sesi.jsx';
 import { ALASAN, jam } from '../../lib/format.js';
 import { AppBar, Galat, Halaman, Hero, Ikon, InfoBatch, Kosong, Overlay, Pesan, Riwayat, Skeleton, Stepper, useKelayakan } from '../../components/ui.jsx';
 import TxLayar from '../../components/TxLayar.jsx';
+import BuktiBatch from '../../components/BuktiBatch.jsx';
 
 const angka = (v) => parseInt(String(v), 10) || 0;
 
@@ -104,14 +105,15 @@ export default function DetailSekolah() {
   return (
     <Halaman>
       <AppBar judul={`Batch ${b.kode}`} kembali={kembali} />
-      <div className="content">
+      <div className="content detail-content">
+        <div className="detail-primary">
         <Hero b={b} k={k} />
         {b.status === 3 && lewat && <Pesan>Batch ini melewati batas 4 jam dan tidak boleh disajikan. Tolak batch agar tercatat dan pengawas dapat melihatnya.</Pesan>}
         {b.status === 2 && <Pesan jenis="info" ikon="truck">Batch sedang diantar {kurir?.oleh}. Hitung porsi yang tiba, lalu catat penerimaan.</Pesan>}
         {b.status <= 1 && <Pesan jenis="info" ikon="clock">Batch masih di dapur {b.dapur}. Penerimaan dicatat saat kurir tiba.</Pesan>}
         {b.jumlahInsiden > 0 && <Pesan jenis="warn" ikon="flag">{b.jumlahInsiden} laporan insiden tercatat untuk batch ini.</Pesan>}
-        <InfoBatch b={b} />
-        <Riwayat b={b} />
+        </div>
+        <div className="detail-secondary"><InfoBatch b={b} /><Riwayat b={b} /><BuktiBatch kode={b.kode} /></div>
       </div>
       {aksi}
 

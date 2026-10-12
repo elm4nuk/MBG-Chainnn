@@ -64,12 +64,10 @@ export function AppBar({ judul, eyebrow, kembali, kanan, kamera }) {
 export function TabBar({ items, brand }) {
   return (
     <nav className="tabs" style={{ '--n': items.length }} aria-label="Menu utama">
-      {brand && (
-        <div className="nav-brand" aria-hidden="true">
+      <div className="nav-brand" aria-hidden="true">
           <span className="nav-mark"><Ikon n="shield" /></span>
-          <span><b>{brand}</b><small>Portal pengelolaan</small></span>
-        </div>
-      )}
+          <span><b>{brand || 'MBG-Chain'}</b><small>Operasional terverifikasi</small></span>
+      </div>
       {items.map((t) => (
         <NavLink key={t.ke} to={t.ke} end className="tab">
           <Ikon n={t.ikon} />{t.label}
@@ -81,6 +79,18 @@ export function TabBar({ items, brand }) {
 
 export function Chip({ nada = 'netral', ikon, children }) {
   return <span className={`chip ${nada}`}>{ikon && <Ikon n={ikon} />}{children}</span>;
+}
+
+export function Ringkasan({ label = 'Ringkasan operasional', items }) {
+  return (
+    <div className="stats role-stats" role="list" aria-label={label}>
+      {items.map((item) => (
+        <div key={item.label} className={`stat ${item.nada || ''}`} role="listitem">
+          <span>{item.label}</span><b>{item.value}</b>{item.help && <small>{item.help}</small>}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 const IKON_NADA = { ok: 'check', warn: 'clock', bad: 'x', pend: 'truck', netral: 'clock' };

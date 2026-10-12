@@ -6,6 +6,7 @@ import { jam } from '../../lib/format.js';
 import { AppBar, Halaman, Hero, Ikon, InfoBatch, Kosong, Overlay, Pesan, Riwayat, Skeleton, useKelayakan } from '../../components/ui.jsx';
 import { LabelQR } from '../../components/Qr.jsx';
 import TxLayar from '../../components/TxLayar.jsx';
+import BuktiBatch from '../../components/BuktiBatch.jsx';
 
 export default function DetailDapur() {
   const { kode } = useParams();
@@ -35,14 +36,15 @@ export default function DetailDapur() {
   return (
     <Halaman>
       <AppBar judul={`Batch ${b.kode}`} eyebrow={b.sekolah} kembali="/dapur" />
-      <div className="content">
-        <LabelQR b={b} />
-        <button type="button" className="btn secondary block" onClick={() => window.print()}><Ikon n="printer" />Cetak label QR</button>
+      <div className="content detail-content">
+        <div className="detail-primary">
+        <div className="qr-actions"><LabelQR b={b} />
+        <button type="button" className="btn secondary block" onClick={() => window.print()}><Ikon n="printer" />Cetak label QR</button></div>
         {!milikSendiri && <Pesan>Batch ini milik {b.dapur}. Anda hanya dapat melihat datanya.</Pesan>}
         <Hero b={b} k={k} />
         {b.status === 1 && <Pesan jenis="info" ikon="truck">Batch siap diambil. Kurir memindai QR ini saat mengambil, dan pengambilan tercatat atas nama kurir.</Pesan>}
-        <InfoBatch b={b} />
-        <Riwayat b={b} />
+        </div>
+        <div className="detail-secondary"><InfoBatch b={b} /><Riwayat b={b} /><BuktiBatch kode={b.kode} /></div>
       </div>
       {b.status === 0 && milikSendiri && (
         <div className="actions"><button type="button" className="btn primary" onClick={() => setTanya(true)}><Ikon n="check" />Catat selesai masak</button></div>
