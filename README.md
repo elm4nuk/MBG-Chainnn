@@ -97,7 +97,7 @@ https://elm4nuk.github.io/MBG-Chainnn/ menjalankan aplikasi yang sama tanpa serv
 
 - Data hanya ada di tab tersebut dan kembali ke awal saat halaman dimuat ulang; setiap pengunjung punya chain sendiri.
 - Prototype klik Session 10 (bingkai iPhone) tetap ada di https://elm4nuk.github.io/MBG-Chainnn/prototype/.
-- Membuat ulang berkasnya: `npm run pages:build` → hasil di `frontend/dist-pages/`, lalu salin ke branch `gh-pages` (bersama folder `prototype/`).
+- Deploy otomatis oleh GitHub Actions (`.github/workflows/ci.yml`) setiap push ke `main` yang lulus test dan E2E. Build lokal: `npm run pages:build` → `frontend/dist-pages/`; prototype disalin dari `docs/prototype/`.
 - Uji asap: `python tools/pages_smoke.py https://elm4nuk.github.io/MBG-Chainnn/` (login, sajikan, tolak, verifikasi, pantau, HP & desktop).
 - Untuk presentasi tetap disarankan `npm run demo:start` di laptop, karena tidak bergantung pada unduhan ±9 MB.
 
@@ -142,6 +142,14 @@ Data demo meniru skenario prototype Session 10: setelah `npm run seed`, B-0001 s
 2. Jalankan `npm run deploy`. Hasilnya tersimpan di `deployments/sepolia.json`.
 
 `seed.js` dan aplikasi demo dirancang untuk jaringan lokal: akun petugas di Ganache dikelola node, sedangkan di testnet setiap petugas perlu penandatangan sendiri.
+
+## CI (GitHub Actions)
+
+Setiap push dan pull request: unit test di Node 20 dan 22, build biasa dan build Pages, E2E + pemeriksaan responsif dengan Playwright, serta Slither (scan keamanan kontrak, saat ini laporan saja). Push ke `main` yang lulus test dan E2E otomatis men-deploy GitHub Pages.
+
+## Keterbatasan dan pengembangan berikutnya
+
+Ringkasan untuk paper ada di [docs/FUTURE-WORK.md](docs/FUTURE-WORK.md): Ganache dan Web3.js sudah tidak dikembangkan (migrasi ke viem dan Hardhat/Anvil di branch `migrasi-viem`), penanda tangan per petugas, AccessControl + Safe untuk admin, data pribadi on-chain, indexer, dan pilihan jaringan (Sepolia untuk uji publik, Hyperledger Besu untuk produksi).
 
 ## Catatan keamanan
 

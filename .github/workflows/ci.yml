@@ -1,0 +1,104 @@
+# CI MBG-Chain: unit test + build, uji browser (E2E + responsif), scan keamanan kontrak (Slither),
+# lalu deploy GitHub Pages (mode demo browser) dari main bila test dan E2E lulus.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Unit test & build (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run app:build
+      - run: npm run pages:build
+
+  e2e:
+    name: E2E & responsif (Playwright)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: pip install playwright==1.60.0 && python -m playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          PYTHON: python
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: screenshot-e2e
+          path: tools/shots/
+          retention-days: 7
+
+  slither:
+    name: Slither (scan keamanan kontrak)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # Laporan saja dulu (fail-on: none); naikkan ke "medium" setelah temuan awal ditinjau.
+      - uses: crytic/slither-action@v0.4.2
+        with:
+          target: contracts/MBGChain.sol
+          solc-version: 0.8.30
+          fail-on: none
+
+  pages:
+    name: Deploy GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test, e2e]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run pages:build
+      # Aplikasi (blockchain di browser) di root, prototype klik Session 10 di /prototype/.
+      - run: |
+          mkdir -p situs/prototype
+          cp -R frontend/dist-pages/. situs/
+          cp docs/prototype/index.html situs/prototype/index.html
+          touch situs/.nojekyll
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: situs
+      - id: deploy
+        uses: actions/deploy-pages@v5
