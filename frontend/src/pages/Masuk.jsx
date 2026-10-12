@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useSesi } from '../lib/sesi.jsx';
 import { berandaUntuk } from '../lib/format.js';
-import { Galat, Halaman, Ikon, InfoJaringan } from '../components/ui.jsx';
+import { Galat, Ikon, InfoJaringan } from '../components/ui.jsx';
 
 const SANDI_DEMO = 'mbgchain';
 
@@ -41,12 +41,31 @@ export default function Masuk() {
   };
 
   return (
-    <Halaman>
-      <div className="login">
+    <div className="masuk">
+      <section className="masuk-hero" aria-labelledby="judul-hero">
         <div className="brand">
           <div className="mark"><Ikon n="bowl" /></div>
-          <div><h1>MBG-Chain</h1><p className="muted">Pencatatan makan bergizi di sekolah</p></div>
+          <div><p className="brand-nama">MBG-Chain</p><p className="muted">Pencatatan makan bergizi di sekolah</p></div>
         </div>
+        <h1 id="judul-hero">Lacak perjalanan makanan, dari dapur sampai disajikan.</h1>
+        <p className="hero-sub">Setiap serah terima tercatat dan batas konsumsi empat jam dipantau melalui blockchain.</p>
+        <ol className="alur" aria-label="Alur batch MBG">
+          <li><span className="alur-ic"><Ikon n="bowl" /></span><b>SPPG</b><small>Daftar &amp; masak</small></li>
+          <li aria-hidden="true" className="alur-panah"><Ikon n="panah" /></li>
+          <li><span className="alur-ic"><Ikon n="truck" /></span><b>Kurir</b><small>Ambil &amp; antar</small></li>
+          <li aria-hidden="true" className="alur-panah"><Ikon n="panah" /></li>
+          <li><span className="alur-ic"><Ikon n="sekolah" /></span><b>Sekolah</b><small>Terima &amp; periksa</small></li>
+          <li aria-hidden="true" className="alur-panah"><Ikon n="panah" /></li>
+          <li className="akhir"><span className="alur-ic"><Ikon n="check" /></span><b>Disajikan</b><small>≤ 4 jam</small></li>
+        </ol>
+        <ul className="jaminan">
+          <li><Ikon n="clock" />Batas 4 jam ditegakkan smart contract</li>
+          <li><Ikon n="shield" />Riwayat tidak dapat diubah sepihak</li>
+        </ul>
+      </section>
+
+      <section className="masuk-kartu" aria-labelledby="judul-masuk">
+        <h2 id="judul-masuk">Masuk petugas</h2>
         <form className="form" onSubmit={kirim} noValidate>
           <div className="field">
             <label htmlFor="pid">ID petugas</label>
@@ -77,14 +96,14 @@ export default function Masuk() {
             </ul>
           </details>
         )}
+        <p className="muted kecil">Akun dibuat oleh admin BGN. Lupa kata sandi? Hubungi admin.</p>
+      </section>
 
-        <div className="links">
-          <Link to="/verifikasi" className="btn secondary block"><Ikon n="qr" />Verifikasi batch tanpa login</Link>
-          <Link to="/pantau" className="btn ghost block"><Ikon n="chart" />Pantau batch (pengawas BGN / Dinkes)</Link>
-        </div>
-        <p className="muted" style={{ margin: 'auto 0 0', fontSize: 13, textAlign: 'center' }}>Akun dibuat oleh admin BGN. Lupa kata sandi? Hubungi admin.</p>
-      </div>
-      <InfoJaringan />
-    </Halaman>
+      <nav className="masuk-tautan" aria-label="Akses tanpa login">
+        <Link to="/verifikasi" className="btn secondary block"><Ikon n="qr" />Verifikasi batch tanpa login</Link>
+        <Link to="/pantau" className="btn ghost block"><Ikon n="chart" />Pantau batch (pengawas BGN / Dinkes)</Link>
+      </nav>
+      <div className="masuk-net"><InfoJaringan /></div>
+    </div>
   );
 }

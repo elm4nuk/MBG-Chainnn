@@ -6,7 +6,8 @@ import Lapor from '../sekolah/Lapor.jsx';
 import { TABS_PUSKESMAS } from '../tabs.js';
 import { useMuat, useSesi } from '../../lib/sesi.jsx';
 import { jam, tanggal } from '../../lib/format.js';
-import { AppBar, Halaman, Hero, Ikon, InfoBatch, ItemBatch, Kosong, Pesan, Riwayat, Skeleton, TabBar, useKelayakan } from '../../components/ui.jsx';
+import { AppBar, Halaman, Hero, Ikon, InfoBatch, ItemBatch, Kosong, Pesan, Riwayat, Skeleton, Statistik, TabBar, TataDetail, useKelayakan } from '../../components/ui.jsx';
+import { BuktiBatch } from '../../components/Bukti.jsx';
 import { PemindaiQR } from '../../components/Qr.jsx';
 
 function Beranda() {
@@ -23,7 +24,17 @@ function Beranda() {
       <AppBar judul={profil.organisasi} eyebrow="Petugas Puskesmas" />
       <div className="content">
         <div className="date">{tanggal(now)} · pukul {jam(now)}</div>
-        <Link to="/puskesmas/pindai" className="btn primary block"><Ikon n="search" />Cari batch (QR atau kode)</Link>
+        {data && (
+          <Statistik label="Ringkasan insiden" items={[
+            { label: 'Batch dengan insiden', nilai: insiden.length, nada: insiden.length ? 'bad' : 'netral', ket: 'Perlu ditelusuri' },
+            { label: 'Total laporan', nilai: insiden.reduce((n, x) => n + x.b.jumlahInsiden, 0), nada: 'warn', ket: 'Dari sekolah & Puskesmas' },
+            { label: 'Disajikan tanpa laporan', nilai: disajikan.length, nada: 'ok', ket: 'Belum ada keluhan' },
+          ]} />
+        )}
+        <div className="aksi-utama">
+          <Link to="/puskesmas/pindai" className="btn primary block"><Ikon n="search" />Cari batch (QR atau kode)</Link>
+          <p className="help">Telusuri riwayat dan jejak audit batch yang dikeluhkan.</p>
+        </div>
         {loading && !data && <Skeleton n={2} />}
         {error && <Pesan>{error.message}</Pesan>}
         {data && (
@@ -63,20 +74,26 @@ function Detail() {
     <Halaman>
       <AppBar judul={`Batch ${b.kode}`} eyebrow={b.sekolah} kembali="/puskesmas" />
       <div className="content">
-        <Hero b={b} k={nilaiK(b)} />
-        <section className="card">
-          <h3>Laporan insiden ({laporan.length})</h3>
-          {laporan.length ? (
-            <ol className="tl">
-              {laporan.map((l) => (
-                <li key={l.txHash}><span className="ic bad"><Ikon n="flag" /></span>
-                  <div><b>{jam(l.waktu)} · {l.pelapor.nama} ({l.pelapor.organisasi})</b><span>{l.data.keterangan}</span></div></li>
-              ))}
-            </ol>
-          ) : <p className="muted" style={{ margin: 0 }}>Belum ada laporan untuk batch ini.</p>}
-        </section>
-        <InfoBatch b={b} />
-        <Riwayat b={b} />
+        <TataDetail
+          utama={<>
+            <Hero b={b} k={nilaiK(b)} />
+            <section className="card">
+              <h3>Laporan insiden ({laporan.length})</h3>
+              {laporan.length ? (
+                <ol className="tl">
+                  {laporan.map((l) => (
+                    <li key={l.txHash}><span className="ic bad"><Ikon n="flag" /></span>
+                      <div><b>{jam(l.waktu)} · {l.pelapor.nama} ({l.pelapor.organisasi})</b><span>{l.data.keterangan}</span></div></li>
+                  ))}
+                </ol>
+              ) : <p className="muted" style={{ margin: 0 }}>Belum ada laporan untuk batch ini.</p>}
+            </section>
+            <InfoBatch b={b} />
+          </>}
+          samping={<>
+            <Riwayat b={b} />
+            <BuktiBatch kode={b.kode} />
+          </>} />
       </div>
       {b.status >= 3 && <div className="actions"><Link to={`/puskesmas/lapor?kode=${b.kode}`} className="btn primary"><Ikon n="flag" />Laporkan insiden</Link></div>}
     </Halaman>

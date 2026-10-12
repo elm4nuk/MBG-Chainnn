@@ -90,8 +90,13 @@ async function main() {
 
   console.log('▶ Playwright (Chromium)');
   const kode = await pengelola.jalankan('[e2e]', PYTHON, ['-u', path.join(ROOT, 'tools', 'e2e_playwright.py'), APP], { cwd: ROOT, env: { ...env, MBG_RPC: RPC, PYTHONUNBUFFERED: '1' } });
-  console.log(kode === 0 ? '\n✔ Uji browser lulus. Screenshot: tools/shots/' : `\n✖ Uji browser gagal (kode ${kode}). Lihat langkah GAGAL di atas.`);
-  return kode;
+  console.log(kode === 0 ? '\n✔ Uji alur browser lulus. Screenshot: tools/shots/' : `\n✖ Uji alur browser gagal (kode ${kode}). Lihat langkah GAGAL di atas.`);
+
+  // Tata letak 375 / 768 / 1024 / 1440 px di chain yang sama (data sudah melewati semua tahap alur di atas).
+  console.log('▶ Pemeriksaan responsif (Chromium)');
+  const kodeTata = await pengelola.jalankan('[responsif]', PYTHON, ['-u', path.join(ROOT, 'tools', 'responsif_playwright.py'), APP], { cwd: ROOT, env: { ...env, PYTHONUNBUFFERED: '1' } });
+  console.log(kodeTata === 0 ? '✔ Tata letak responsif lulus. Screenshot: tools/shots/responsif/' : `✖ Pemeriksaan responsif gagal (kode ${kodeTata}).`);
+  return kode || kodeTata;
 }
 
 main().then((kode) => selesai(kode ?? 1)).catch((e) => {

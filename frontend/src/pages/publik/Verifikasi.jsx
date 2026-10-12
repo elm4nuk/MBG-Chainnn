@@ -3,17 +3,15 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMuat, useSesi } from '../../lib/sesi.jsx';
 import { berandaUntuk, jam } from '../../lib/format.js';
-import { AppBar, Halaman, Hero, Ikon, InfoBatch, Kosong, Pesan, Riwayat, Skeleton, useKelayakan } from '../../components/ui.jsx';
-import { BuktiBlockchain } from '../../components/Bukti.jsx';
+import { AppBar, Halaman, Hero, Ikon, InfoBatch, Kosong, Pesan, Riwayat, Skeleton, TataDetail, useKelayakan } from '../../components/ui.jsx';
+import { BuktiBlockchain, useJejak } from '../../components/Bukti.jsx';
 import { PemindaiQR } from '../../components/Qr.jsx';
 
 function DetailPublik({ kode, kembali }) {
   const { klien } = useSesi();
   const nilaiK = useKelayakan();
-  const { data, loading, error } = useMuat(async () => {
-    const [b, jejak] = await Promise.all([klien.batch(kode), klien.jejakAudit(kode)]);
-    return { b, jejak };
-  }, [kode]);
+  const { data, loading, error } = useMuat(() => klien.batch(kode).then((b) => ({ b })), [kode]);
+  const { data: jejak, error: galatJejak } = useJejak(kode);
 
   if (loading && !data) return <div className="content"><Skeleton n={3} teks={`Membaca batch ${kode} dari blockchain…`} /></div>;
   if (error || !data) {
@@ -24,21 +22,28 @@ function DetailPublik({ kode, kembali }) {
       </div>
     );
   }
-  const { b, jejak } = data;
+  const { b } = data;
   const k = nilaiK(b);
   const aman = b.status === 4;
   return (
     <div className="content">
-      <Pesan jenis={aman ? 'info' : b.status === 5 ? 'bad' : 'info'} ikon="shield">
-        {aman && `Batch ini disajikan pukul ${jam(b.riwayat.at(-1)?.waktu)}, sebelum batas konsumsi ${jam(k.batas)}.`}
-        {b.status === 5 && `Batch ini ditolak sekolah (${b.alasanTolak}) dan tidak dibagikan kepada siswa.`}
-        {b.status < 4 && 'Batch ini masih dalam proses. Data di bawah dibaca langsung dari smart contract.'}
-      </Pesan>
-      <Hero b={b} k={k} />
-      {b.jumlahInsiden > 0 && <Pesan jenis="warn" ikon="flag">{b.jumlahInsiden} laporan insiden tercatat untuk batch ini.</Pesan>}
-      <InfoBatch b={b} />
-      <Riwayat b={b} />
-      <BuktiBlockchain jejak={jejak} />
+      <TataDetail
+        utama={<>
+          <Pesan jenis={aman ? 'info' : b.status === 5 ? 'bad' : 'info'} ikon="shield">
+            {aman && `Batch ini disajikan pukul ${jam(b.riwayat.at(-1)?.waktu)}, sebelum batas konsumsi ${jam(k.batas)}.`}
+            {b.status === 5 && `Batch ini ditolak sekolah (${b.alasanTolak}) dan tidak dibagikan kepada siswa.`}
+            {b.status < 4 && 'Batch ini masih dalam proses. Data di bawah dibaca langsung dari smart contract.'}
+          </Pesan>
+          <Hero b={b} k={k} />
+          {b.jumlahInsiden > 0 && <Pesan jenis="warn" ikon="flag">{b.jumlahInsiden} laporan insiden tercatat untuk batch ini.</Pesan>}
+          <InfoBatch b={b} />
+        </>}
+        samping={<>
+          <Riwayat b={b} />
+          {jejak ? <BuktiBlockchain jejak={jejak} />
+            : galatJejak ? <Pesan>Bukti transaksi gagal dimuat: {galatJejak.message}</Pesan>
+              : <Skeleton n={1} teks="Membaca bukti transaksi dari blockchain…" />}
+        </>} />
     </div>
   );
 }

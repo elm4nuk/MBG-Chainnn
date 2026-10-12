@@ -26,3 +26,9 @@ export const TABS_ADMIN = [
   { ke: '/admin/pantau', ikon: 'chart', label: 'Pantau' },
   { ke: '/admin/profil', ikon: 'user', label: 'Profil' },
 ];
+// Halaman publik (tanpa login): pengawas BGN / Dinkes dan orang tua
+export const NAV_PUBLIK = [
+  { ke: '/pantau', ikon: 'chart', label: 'Pantau batch' },
+  { ke: '/verifikasi', ikon: 'qr', label: 'Verifikasi batch' },
+  { ke: '/masuk', ikon: 'user', label: 'Masuk petugas' },
+];

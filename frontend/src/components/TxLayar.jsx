@@ -53,7 +53,7 @@ export default function TxLayar({ tx, teks, onSelesai, labelSelesai = 'Kembali k
             )}
           </div>
         </div>
-        <div className="actions"><button type="button" className="btn primary block" onClick={onSelesai}>{labelSelesai}</button></div>
+        <div className="actions aksi-tx"><button type="button" className="btn primary block" onClick={onSelesai}>{labelSelesai}</button></div>
         {toast}
       </>
     );
@@ -69,7 +69,7 @@ export default function TxLayar({ tx, teks, onSelesai, labelSelesai = 'Kembali k
           <h2>Pencatatan gagal</h2>
           <p>Koneksi ke jaringan MBG-Chain terputus sebelum data tercatat. Tidak ada perubahan yang tersimpan.</p>
         </div>
-        <div className="actions">
+        <div className="actions aksi-tx">
           <button type="button" className="btn secondary" onClick={onKembali}>Kembali</button>
           <button type="button" className="btn primary" onClick={onUlang}>Coba lagi</button>
         </div>
@@ -86,7 +86,7 @@ export default function TxLayar({ tx, teks, onSelesai, labelSelesai = 'Kembali k
         <p>{batas ? `Batas konsumsi (${jam(batas)}) sudah terlewati. Batch ini tidak boleh disajikan.` : e.message}</p>
         {e.kode && <p className="muted" style={{ fontSize: 12.5 }}>Kode dari smart contract: <span className="mono">{e.kode}</span></p>}
       </div>
-      <div className="actions">
+      <div className="actions aksi-tx">
         {aksiDitolak && e.kode === aksiDitolak.kode
           ? <button type="button" className="btn primary block" onClick={aksiDitolak.onClick}>{aksiDitolak.label}</button>
           : <button type="button" className="btn primary block" onClick={onKembali}>Kembali</button>}

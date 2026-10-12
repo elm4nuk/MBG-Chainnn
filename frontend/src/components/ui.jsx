@@ -33,6 +33,8 @@ const PATH = {
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
   link: '<path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',
   refresh: '<path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/>',
+  panah: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  sekolah: '<path d="M3 10l9-5 9 5-9 5z"/><path d="M7 12.2V17c0 1 2.2 2.5 5 2.5s5-1.5 5-2.5v-4.8"/>',
 };
 
 export function Ikon({ n, ...p }) {
@@ -54,22 +56,17 @@ export function AppBar({ judul, eyebrow, kembali, kanan, kamera }) {
       )}
       <div className="grow">
         {eyebrow && <div className="eyebrow">{eyebrow}</div>}
-        <div className="title">{judul}</div>
+        <h1 className="title">{judul}</h1>
       </div>
       {kanan}
     </header>
   );
 }
 
-export function TabBar({ items, brand }) {
+/** Menu bawah untuk HP. Di tablet dan desktop navigasi pindah ke sidebar (TataLetak), menu ini disembunyikan. */
+export function TabBar({ items }) {
   return (
     <nav className="tabs" style={{ '--n': items.length }} aria-label="Menu utama">
-      {brand && (
-        <div className="nav-brand" aria-hidden="true">
-          <span className="nav-mark"><Ikon n="shield" /></span>
-          <span><b>{brand}</b><small>Portal pengelolaan</small></span>
-        </div>
-      )}
       {items.map((t) => (
         <NavLink key={t.ke} to={t.ke} end className="tab">
           <Ikon n={t.ikon} />{t.label}
@@ -192,6 +189,30 @@ export function ItemBatch({ b, k, ke, meta }) {
   );
 }
 
+/** Ringkasan angka dari kontrak. nada: ok | warn | bad | pend | netral. */
+export function Statistik({ label, items }) {
+  return (
+    <div className="stats" role="list" aria-label={label}>
+      {items.map((x) => (
+        // angka 0 tidak diberi warna peringatan: merah/kuning hanya bila memang ada yang perlu ditindak
+        <div key={x.label} className={`stat ${x.nilai === 0 && (x.nada === 'bad' || x.nada === 'warn') ? 'netral' : x.nada || ''}`} role="listitem">
+          <span>{x.label}</span><b>{x.nilai}</b>{x.ket && <small>{x.ket}</small>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Detail batch: satu kolom di HP, dua kolom (utama | riwayat & bukti) di desktop. */
+export function TataDetail({ utama, samping }) {
+  return (
+    <div className="detail-grid">
+      <div className="kol-utama">{utama}</div>
+      <div className="kol-samping">{samping}</div>
+    </div>
+  );
+}
+
 export function Kosong({ ikon = 'tray', judul, children }) {
   return (
     <div className="empty">
@@ -238,7 +259,7 @@ export function Overlay({ jenis = 'sheet', onTutup, label, children }) {
     };
   }, []);
   return (
-    <div className="overlay">
+    <div className={`overlay o-${jenis}`}>
       {onTutup
         ? <button type="button" className="scrim" aria-label="Tutup" onClick={onTutup} tabIndex={-1} />
         : <div className="scrim" aria-hidden="true" />}

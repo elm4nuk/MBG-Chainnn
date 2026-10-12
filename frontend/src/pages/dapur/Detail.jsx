@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useMuat, useSesi, useTx } from '../../lib/sesi.jsx';
 import { jam } from '../../lib/format.js';
-import { AppBar, Halaman, Hero, Ikon, InfoBatch, Kosong, Overlay, Pesan, Riwayat, Skeleton, useKelayakan } from '../../components/ui.jsx';
+import { AppBar, Halaman, Hero, Ikon, InfoBatch, Kosong, Overlay, Pesan, Riwayat, Skeleton, TataDetail, useKelayakan } from '../../components/ui.jsx';
+import { BuktiBatch } from '../../components/Bukti.jsx';
 import { LabelQR } from '../../components/Qr.jsx';
 import TxLayar from '../../components/TxLayar.jsx';
 
@@ -36,13 +37,20 @@ export default function DetailDapur() {
     <Halaman>
       <AppBar judul={`Batch ${b.kode}`} eyebrow={b.sekolah} kembali="/dapur" />
       <div className="content">
-        <LabelQR b={b} />
-        <button type="button" className="btn secondary block" onClick={() => window.print()}><Ikon n="printer" />Cetak label QR</button>
-        {!milikSendiri && <Pesan>Batch ini milik {b.dapur}. Anda hanya dapat melihat datanya.</Pesan>}
-        <Hero b={b} k={k} />
-        {b.status === 1 && <Pesan jenis="info" ikon="truck">Batch siap diambil. Kurir memindai QR ini saat mengambil, dan pengambilan tercatat atas nama kurir.</Pesan>}
-        <InfoBatch b={b} />
-        <Riwayat b={b} />
+        <TataDetail
+          utama={<>
+            {!milikSendiri && <Pesan>Batch ini milik {b.dapur}. Anda hanya dapat melihat datanya.</Pesan>}
+            <Hero b={b} k={k} />
+            {b.status === 0 && <Pesan jenis="info" ikon="clock">Hitungan batas 4 jam dimulai saat Anda mencatat selesai masak, bukan saat batch didaftarkan.</Pesan>}
+            {b.status === 1 && <Pesan jenis="info" ikon="truck">Batch siap diambil. Kurir memindai QR ini saat mengambil, dan pengambilan tercatat atas nama kurir.</Pesan>}
+            <LabelQR b={b} />
+            <button type="button" className="btn secondary block" onClick={() => window.print()}><Ikon n="printer" />Cetak label QR</button>
+            <InfoBatch b={b} />
+          </>}
+          samping={<>
+            <Riwayat b={b} />
+            <BuktiBatch kode={b.kode} />
+          </>} />
       </div>
       {b.status === 0 && milikSendiri && (
         <div className="actions"><button type="button" className="btn primary" onClick={() => setTanya(true)}><Ikon n="check" />Catat selesai masak</button></div>

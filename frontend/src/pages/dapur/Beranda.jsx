@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useMuat, useSesi } from '../../lib/sesi.jsx';
 import { jam, tanggal } from '../../lib/format.js';
-import { AppBar, Halaman, Ikon, ItemBatch, Kosong, Pesan, Skeleton, TabBar, useKelayakan } from '../../components/ui.jsx';
+import { AppBar, Halaman, Ikon, ItemBatch, Kosong, Pesan, Skeleton, Statistik, TabBar, useKelayakan } from '../../components/ui.jsx';
 import { TABS_DAPUR } from '../tabs.js';
 
 function Bagian({ judul, sub, isi, meta }) {
@@ -31,7 +31,18 @@ export default function BerandaDapur() {
       <AppBar judul={profil.organisasi} eyebrow="Petugas dapur" />
       <div className="content">
         <div className="date">{tanggal(now)} · pukul {jam(now)}</div>
-        <Link to="/dapur/baru" className="btn primary block"><Ikon n="plus" />Daftarkan batch baru</Link>
+        {data && (
+          <Statistik label="Ringkasan batch dapur" items={[
+            { label: 'Belum dimasak', nilai: per([0]).length, nada: 'netral', ket: 'Catat selesai masak' },
+            { label: 'Menunggu kurir', nilai: per([1]).length, nada: 'pend', ket: 'Hitungan 4 jam berjalan' },
+            { label: 'Dalam perjalanan', nilai: per([2, 3]).length, nada: 'pend', ket: 'Diantar atau di sekolah' },
+            { label: 'Selesai', nilai: per([4, 5]).length, nada: 'ok', ket: `${per([4]).length} disajikan · ${per([5]).length} ditolak` },
+          ]} />
+        )}
+        <div className="aksi-utama">
+          <Link to="/dapur/baru" className="btn primary block"><Ikon n="plus" />Daftarkan batch baru</Link>
+          <p className="help"><Ikon n="clock" />Hitungan batas 4 jam dimulai saat Anda mencatat selesai masak, bukan saat batch didaftarkan.</p>
+        </div>
         {loading && !data && <Skeleton n={3} teks="Memuat batch dapur dari blockchain…" />}
         {error && <Pesan>{error.message}</Pesan>}
         {data && !semua.length && <Kosong ikon="bowl" judul="Belum ada batch">Daftarkan batch untuk setiap sekolah tujuan, lalu tempel label QR pada wadahnya.</Kosong>}

@@ -47,7 +47,7 @@ export default function BatchBaru() {
   return (
     <Halaman>
       <AppBar judul="Batch baru" eyebrow={profil.organisasi} kembali="/dapur" />
-      <div className="content">
+      <div className="content sempit">
         {loading && <Skeleton n={1} teks="Memuat daftar sekolah…" />}
         {error && <Pesan>{error.message}</Pesan>}
         {org && (

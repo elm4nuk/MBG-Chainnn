@@ -82,7 +82,7 @@ function Organisasi() {
       <AppBar judul="Organisasi" eyebrow="Admin BGN · peserta jaringan" />
       <div className="content dashboard-content">
         <section className="dashboard-intro" aria-labelledby="judul-organisasi">
-          <div><span className="section-kicker">Administrasi jaringan</span><h1 id="judul-organisasi">Kelola organisasi MBG</h1></div>
+          <div><span className="section-kicker">Administrasi jaringan</span><h2 id="judul-organisasi">Kelola organisasi MBG</h2></div>
           <p>Daftarkan lembaga yang boleh terlibat dalam alur batch. Seluruh angka di bawah dibaca dari kontrak.</p>
         </section>
         {data && (
@@ -135,7 +135,7 @@ function Organisasi() {
           </form>
         </div>
       </div>
-      <TabBar items={TABS_ADMIN} brand="MBG-Chain" />
+      <TabBar items={TABS_ADMIN} />
       {tinjau && (
         <Overlay jenis="dialog" label="Tinjau organisasi">
           <h2>Daftarkan organisasi?</h2>
@@ -204,7 +204,7 @@ function Petugas() {
       <AppBar judul="Petugas" eyebrow="Admin BGN · peserta jaringan" />
       <div className="content dashboard-content">
         <section className="dashboard-intro" aria-labelledby="judul-petugas">
-          <div><span className="section-kicker">Kontrol akses</span><h1 id="judul-petugas">Kelola petugas jaringan</h1></div>
+          <div><span className="section-kicker">Kontrol akses</span><h2 id="judul-petugas">Kelola petugas jaringan</h2></div>
           <p>Hubungkan akun Ganache ke organisasi dan tinjau status akses pencatatan.</p>
         </section>
         {data && (
@@ -267,7 +267,7 @@ function Petugas() {
           </form>
         </div>}
       </div>
-      <TabBar items={TABS_ADMIN} brand="MBG-Chain" />
+      <TabBar items={TABS_ADMIN} />
 
       {tanya?.jenis === 'daftar' && (
         <Overlay jenis="dialog" label="Tinjau petugas">
@@ -298,7 +298,7 @@ function PantauAdmin() {
     <Halaman lebar>
       <AppBar judul="Pantau batch" eyebrow="Admin BGN · pengawasan" />
       <div className="content dashboard-content"><DasborBatch /></div>
-      <TabBar items={TABS_ADMIN} brand="MBG-Chain" />
+      <TabBar items={TABS_ADMIN} />
     </Halaman>
   );
 }

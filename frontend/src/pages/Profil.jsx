@@ -41,7 +41,7 @@ export default function Profil({ tabs, lebar }) {
   return (
     <Halaman lebar={lebar}>
       <AppBar judul="Profil" eyebrow={profil.peran} />
-      <div className="content">
+      <div className="content sempit">
         <section className="card">
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <div className="mark" style={{ width: 48, height: 48, borderRadius: 14 }}><Ikon n={profil.admin ? 'shield' : 'user'} /></div>

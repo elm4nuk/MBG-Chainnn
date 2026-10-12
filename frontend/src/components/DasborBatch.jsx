@@ -5,8 +5,8 @@ import { useDeferredValue, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMuat, useSesi } from '../lib/sesi.jsx';
 import { angkaID, durasi, jam, tanggal } from '../lib/format.js';
-import { ChipBatch, Hero, Ikon, InfoBatch, Kosong, Overlay, Pesan, Riwayat, Skeleton, useKelayakan } from './ui.jsx';
-import { BuktiBlockchain } from './Bukti.jsx';
+import { ChipBatch, Hero, Ikon, InfoBatch, Kosong, Overlay, Pesan, Riwayat, Skeleton, Statistik, useKelayakan } from './ui.jsx';
+import { BuktiBlockchain, useJejak } from './Bukti.jsx';
 
 const FILTER = [
   { kode: 'risiko', teks: 'Berisiko' },
@@ -44,10 +44,9 @@ function KepalaUrut({ kolom, urut, setUrut, children }) {
 }
 
 function PanelDetail({ b, onTutup }) {
-  const { klien } = useSesi();
   const nilaiK = useKelayakan();
   const k = nilaiK(b);
-  const { data: jejak, loading, error, reload } = useMuat(() => klien.jejakAudit(b.kode), [b.kode]);
+  const { data: jejak, loading, error, reload } = useJejak(b.kode);
   return (
     <Overlay jenis="laci" onTutup={onTutup} label={`Detail pencatatan batch ${b.kode}`}>
       <div className="laci-head">
@@ -77,7 +76,7 @@ export default function DasborBatch() {
   const nilaiK = useKelayakan();
   const { data, loading, error, reload } = useMuat(() => klien.semuaBatch(), []);
   useEffect(() => { if (detak && detak % 2 === 0) reload(true); }, [detak]); // segarkan tiap 30 detik
-  const [filter, setFilter] = useState('risiko');
+  const [pilihFilter, setFilter] = useState(null); // null = otomatis: Berisiko bila ada, selain itu Semua
   const [cari, setCari] = useState('');
   const [urut, setUrut] = useState({ kolom: 'waktu', arah: 'naik' });
   const [pilih, setPilih] = useState(null); // id batch yang detailnya dibuka
@@ -95,6 +94,7 @@ export default function DasborBatch() {
   const insiden = semua.reduce((n, x) => n + x.b.jumlahInsiden, 0);
   const porsiSaji = disajikan.reduce((n, x) => n + x.b.porsiSelesai, 0);
   const kelompok = { risiko: berisiko, jalan, selesai, semua };
+  const filter = pilihFilter || (berisiko.length || !data ? 'risiko' : 'semua');
   const tampil = kelompok[filter]
     .filter(({ b }) => !cariTunda || `${b.kode} ${b.sekolah} ${b.dapur} ${b.menu}`.toLocaleLowerCase('id-ID').includes(cariTunda))
     .sort((p, q) => URUT[urut.kolom](p, q) * (urut.arah === 'naik' ? 1 : -1));
@@ -111,7 +111,7 @@ export default function DasborBatch() {
   return (
     <>
       <section className="dashboard-intro monitor-intro" aria-labelledby="judul-pantau">
-        <div><span className="section-kicker">Pemantauan operasional</span><h1 id="judul-pantau">Status distribusi batch</h1></div>
+        <div><span className="section-kicker">Pemantauan operasional</span><h2 id="judul-pantau">Status distribusi batch</h2></div>
         <p>Prioritaskan batch yang mendekati atau melewati batas konsumsi empat jam. Klik kode batch untuk melihat riwayat dan bukti transaksinya.</p>
         <div className="date">
           <Ikon n="clock" />{tanggal(now)} · pukul {jam(now)} (jam blockchain)
@@ -121,13 +121,15 @@ export default function DasborBatch() {
       </section>
 
       {data && (
-        <div className="stats monitor-stats" role="list" aria-label="Ringkasan batch">
-          <div className="stat pend" role="listitem"><span>Batch berjalan</span><b>{jalan.length}</b><small>Dalam alur distribusi</small></div>
-          <div className="stat warn" role="listitem"><span>Mendekati batas</span><b>{berisiko.length - lewat.length}</b><small>Sisa ≤ 60 menit</small></div>
-          <div className="stat bad" role="listitem"><span>Lewat batas</span><b>{lewat.length}</b><small>Belum ditolak sekolah</small></div>
-          <div className="stat ok" role="listitem"><span>Disajikan</span><b>{disajikan.length}</b><small>{angkaID(porsiSaji)} porsi tercatat</small></div>
-          <div className="stat" role="listitem"><span>Ditolak sekolah</span><b>{ditolak.length}</b><small>Tidak dibagikan</small></div>
-          <div className="stat" role="listitem"><span>Laporan insiden</span><b>{insiden}</b><small>Seluruh batch</small></div>
+        <div className="monitor-stats-wrap">
+          <Statistik label="Ringkasan batch" items={[
+            { label: 'Batch berjalan', nilai: jalan.length, nada: 'pend', ket: 'Dalam alur distribusi' },
+            { label: 'Mendekati batas', nilai: berisiko.length - lewat.length, nada: 'warn', ket: 'Sisa ≤ 60 menit' },
+            { label: 'Lewat batas', nilai: lewat.length, nada: 'bad', ket: 'Belum ditolak sekolah' },
+            { label: 'Disajikan', nilai: disajikan.length, nada: 'ok', ket: `${angkaID(porsiSaji)} porsi tercatat` },
+            { label: 'Ditolak sekolah', nilai: ditolak.length, ket: 'Tidak dibagikan' },
+            { label: 'Laporan insiden', nilai: insiden, nada: insiden ? 'warn' : '', ket: 'Seluruh batch' },
+          ]} />
         </div>
       )}
       {lewat.length > 0 && (
@@ -183,8 +185,8 @@ export default function DasborBatch() {
                     <td data-label="Status"><span className="mobile-cell-label">Status</span><ChipBatch b={x.b} k={x.k} /></td>
                     <td data-label="Porsi" className="num-cell"><span className="mobile-cell-label">Porsi</span><b>{porsiTampil(x.b)}</b><span className="cell-sub">{x.b.status >= 4 ? (x.b.status === 4 ? 'disajikan' : 'ditolak') : x.b.porsiDiterima ? 'diterima' : x.b.status >= 2 ? 'dikirim' : x.b.status === 1 ? 'selesai masak' : 'terdaftar'}</span></td>
                     <td data-label="Waktu" className={x.b.status < 4 && x.b.waktuMasak ? `t-${['netral', 'ok', 'warn', 'bad'][x.k.kode]}` : 'muted'} style={{ fontWeight: 700 }}><span className="mobile-cell-label">Waktu</span>{keterangan(x)}</td>
-                    <td data-label="Insiden" className="num-cell"><span className="mobile-cell-label">Insiden</span>{x.b.jumlahInsiden || '—'}</td>
-                    <td data-label="Bukti" className="table-action">
+                    <td data-label="Insiden" className={`num-cell${x.b.jumlahInsiden ? '' : ' kosong-hp'}`}><span className="mobile-cell-label">Insiden</span>{x.b.jumlahInsiden || '—'}</td>
+                    <td data-label="Bukti" className="table-action aksi-baris">
                       <span className="mobile-cell-label">Bukti</span>
                       <button type="button" className="mini" aria-haspopup="dialog" aria-label={`Lihat detail pencatatan ${x.b.kode}`} onClick={(e) => buka(e, x.b)}>Lihat detail</button>
                     </td>

@@ -47,7 +47,7 @@ export default function Lapor({ puskesmas = false }) {
   return (
     <Halaman>
       <AppBar judul="Lapor insiden" eyebrow={profil.organisasi} kembali={beranda} />
-      <div className="content">
+      <div className="content sempit">
         <Pesan jenis="info" ikon="info">Laporkan keluhan setelah makan, misalnya siswa mual atau makanan berbau. Laporan tercatat permanen di blockchain dan terlihat oleh pengawas.</Pesan>
         {loading && <Skeleton n={2} />}
         {error && <Pesan>{error.message}</Pesan>}

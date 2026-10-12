@@ -29,6 +29,7 @@ Aplikasi React (frontend/) ──► client/mbgchain.js (Web3.js) ──► node
 | `scripts/uji-e2e.js` · `proses.js` | Runner browser dengan chain uji terpisah dan pengelolaan proses lokal |
 | `test/MBGChain.test.js` | 25 unit test (Mocha) + tabel pemakaian gas |
 | `tools/e2e_playwright.py` | Uji end-to-end aplikasi di browser (opsional, Python + Playwright) |
+| `tools/responsif_playwright.py` | Pemeriksaan tata letak 375 / 768 / 1024 / 1440 px untuk semua peran |
 
 ## Menjalankan
 
@@ -76,6 +77,20 @@ Jika chain/deploy/seed sudah berjalan, gunakan `npm run app:https`. Sertifikat t
 
 `vite-plugin-mkcert` tidak dipasang: versi terkini saat pemeriksaan membutuhkan Node ≥22.19, sedangkan proyek mendukung Node ≥20.19 dan plugin tersebut dapat mengelola root CA. Konfigurasi berkas sertifikat menjaga persyaratan versi dan perubahan trust tetap eksplisit.
 
+## Tampilan responsif
+
+Satu aplikasi dan satu sumber data (smart contract) untuk semua ukuran layar; hanya komposisinya yang berubah.
+
+| Lebar layar | Navigasi | Komposisi |
+|---|---|---|
+| HP, di bawah 768 px | Menu bawah (bottom navigation) | Satu kolom, kartu batch, tombol aksi besar menempel di bawah, detail sebagai halaman penuh |
+| Tablet, 768–1023 px | Rail ringkas di kiri | Statistik dan daftar melebar; formulir transaksi tampil sebagai dialog di tengah |
+| Desktop, 1024 px ke atas | Sidebar permanen + identitas akun + status jaringan | Daftar batch sebagai baris terstruktur, detail batch dua kolom (status & data | riwayat & bukti transaksi), tombol aksi di kanan header |
+
+- Halaman **Masuk** berupa hero alur batch (SPPG → Kurir → Sekolah → Disajikan) dan kartu masuk; di HP hero dipadatkan agar formulir langsung terlihat.
+- **Bukti transaksi** menampilkan event, waktu, pelaku (akun penanda tangan transaksi), nomor blok, dan hash. Di halaman petugas bagian ini dilipat agar layar fokus pada tindakan.
+- Animasi hanya CSS (muncul ±220 ms, drawer, sheet, umpan balik transaksi) dan dimatikan otomatis bila sistem meminta *reduce motion*.
+
 ## Akun demo (jaringan lokal)
 
 | ID petugas | Nama | Organisasi | Peran di aplikasi |
@@ -109,7 +124,7 @@ Data demo meniru skenario prototype Session 10: setelah `npm run seed`, B-0001 s
 ## Pengujian
 
 - `npm test`: 25 unit test untuk kontrak dan klien Web3.js, termasuk aturan 4 jam dengan memajukan jam blockchain.
-- `npm run test:e2e` (opsional): menyalakan chain uji terpisah di port 8546, deploy + seed, build + preview, lalu menjalankan 30 langkah Playwright untuk semua peran. Runner memulihkan berkas deployment demo dan menghentikan hanya proses uji miliknya. Termasuk pemeriksaan navigasi Admin, panel bukti transaksi, fokus dialog, dan dashboard mobile tanpa overflow horizontal. Prasyarat: `pip install playwright && playwright install chromium`.
+- `npm run test:e2e` (opsional): menyalakan chain uji terpisah di port 8546, deploy + seed, build + preview, lalu menjalankan 30 langkah Playwright untuk semua peran. Runner memulihkan berkas deployment demo dan menghentikan hanya proses uji miliknya. Termasuk pemeriksaan navigasi Admin, panel bukti transaksi, fokus dialog, dan dashboard mobile tanpa overflow horizontal. Setelah itu `tools/responsif_playwright.py` membuka 19 halaman semua peran di lebar 375, 768, 1024, dan 1440 px (76 pemeriksaan: tanpa scroll horizontal, satu navigasi terlihat, tanpa error console) dan menyimpan screenshot di `tools/shots/responsif/`. Port bisa diganti dengan `E2E_CHAIN_PORT` / `E2E_APP_PORT`, interpreter Python dengan `PYTHON=`. Prasyarat: `pip install playwright && playwright install chromium`.
 
 ## Deploy ke testnet Sepolia (opsional)
 

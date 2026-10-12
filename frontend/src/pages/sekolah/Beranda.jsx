@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMuat, useSesi } from '../../lib/sesi.jsx';
 import { durasi, jam, tanggal } from '../../lib/format.js';
-import { AppBar, Halaman, Ikon, ItemBatch, Kosong, Pesan, Skeleton, TabBar, useKelayakan } from '../../components/ui.jsx';
+import { AppBar, Halaman, Ikon, ItemBatch, Kosong, Pesan, Skeleton, Statistik, TabBar, useKelayakan } from '../../components/ui.jsx';
 import { TABS_SEKOLAH } from '../tabs.js';
 
 export default function BerandaSekolah() {
@@ -22,6 +22,9 @@ export default function BerandaSekolah() {
   const lewat = diterima.find((x) => x.k.kode === 3);
   const mendesak = diterima.find((x) => x.k.kode === 2);
   const utama = lewat || mendesak;
+  const nLewat = diterima.filter((x) => x.k.kode === 3).length;
+  const nDekat = diterima.filter((x) => x.k.kode === 2).length;
+  const nSaji = selesai.filter((x) => x.b.status === 4).length;
 
   const bel = (
     <button type="button" className="icon-btn" aria-label={utama ? 'Peringatan dini, ada batch perlu tindakan' : 'Tidak ada peringatan'}
@@ -45,7 +48,18 @@ export default function BerandaSekolah() {
             <Ikon n="clock" /><div><b>{mendesak.b.kode} tersisa {durasi(mendesak.k.sisa)}</b><span>Sajikan sekarang atau tolak batch.</span></div><span className="chev"><Ikon n="chev" /></span>
           </Link>
         )}
-        <Link to="/sekolah/pindai" className="btn primary block"><Ikon n="qr" />Pindai QR batch</Link>
+        {data && (
+          <Statistik label="Ringkasan batch sekolah" items={[
+            { label: 'Lewat batas', nilai: nLewat, nada: 'bad', ket: nLewat ? 'Tolak agar tercatat' : 'Tidak ada' },
+            { label: 'Mendekati batas', nilai: nDekat, nada: 'warn', ket: 'Sisa ≤ 60 menit' },
+            { label: 'Perlu diterima', nilai: datang.length, nada: 'pend', ket: 'Kurir dalam perjalanan' },
+            { label: 'Selesai', nilai: selesai.length, nada: 'ok', ket: `${nSaji} disajikan · ${selesai.length - nSaji} ditolak` },
+          ]} />
+        )}
+        <div className="aksi-utama">
+          <Link to="/sekolah/pindai" className="btn primary block"><Ikon n="qr" />Pindai QR batch</Link>
+          <p className="help">Pindai label pada wadah untuk menerima, menyajikan, atau menolak batch.</p>
+        </div>
 
         {loading && !data && <Skeleton n={3} teks="Memuat batch sekolah dari blockchain…" />}
         {error && <Pesan>Data batch gagal dimuat: {error.message} <button type="button" className="mini" onClick={() => reload()}>Coba lagi</button></Pesan>}
