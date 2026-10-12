@@ -158,7 +158,7 @@ input.invalid{border-color:var(--bad);border-width:2px}
 .opt:has(input:checked){border-color:var(--primary)}
 
 /* sheet & dialog */
-.overlay{position:fixed;inset:0;z-index:50;display:flex;justify-content:center}
+.overlay{position:fixed;inset:0;z-index:50;display:flex;justify-content:center;overflow:hidden}
 .overlay .scrim{position:absolute;inset:0;background:rgba(10,16,20,.48);border:0;padding:0}
 .overlay .frame{position:relative;width:100%;max-width:480px;height:100%;pointer-events:none}
 .sheet{pointer-events:auto;position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:22px 22px 0 0;padding:10px 16px calc(16px + var(--sab));display:flex;flex-direction:column;gap:10px;max-height:90%;overflow:auto}

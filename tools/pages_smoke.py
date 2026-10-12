@@ -105,8 +105,11 @@ async def main():
         await page.get_by_role('heading', name='Status distribusi batch').wait_for(timeout=20000)
         await page.locator('button[aria-label^="Lihat detail pencatatan"]').first.click()
         await page.get_by_role('dialog').get_by_role('heading', name='Bukti di blockchain').wait_for(timeout=20000)
+        await page.wait_for_timeout(400)  # animasi panel selesai
+        geser = await page.evaluate('[window.scrollX, document.documentElement.scrollLeft]')
+        fokus = await page.evaluate('document.activeElement.getAttribute("aria-label")')
         await page.screenshot(path=str(OUT / 'pantau_detail_desktop.png'))
-        catat('Pantau pengawas: tabel + panel detail bukti')
+        catat('Pantau pengawas: panel detail bukti tanpa menggeser halaman', geser == [0, 0] and fokus == 'Tutup detail', f'scroll {geser}, fokus {fokus}')
         await page.keyboard.press('Escape')
 
         # muat ulang = chain baru: data kembali ke skenario awal

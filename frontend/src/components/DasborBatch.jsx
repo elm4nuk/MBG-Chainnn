@@ -54,8 +54,8 @@ function PanelDetail({ b, onTutup }) {
           <div className="eyebrow">Detail pencatatan</div>
           <h2>Batch {b.kode}</h2>
         </div>
-        {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
-        <button type="button" className="icon-btn" aria-label="Tutup detail" onClick={onTutup} autoFocus><Ikon n="x" /></button>
+        {/* fokus awal diberikan Overlay dengan preventScroll, agar halaman tidak bergeser saat panel masuk */}
+        <button type="button" className="icon-btn" aria-label="Tutup detail" onClick={onTutup} data-autofocus><Ikon n="x" /></button>
       </div>
       <div className="laci-isi">
         <Hero b={b} k={k} />
