@@ -1,6 +1,7 @@
 // Sesi aplikasi: koneksi ke smart contract (Web3.js lewat client/mbgchain.js), akun yang login, dan jam chain.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { MBGChainClient } from '@client';
+import { siapkanChainBrowser } from '@mode-chain'; // null kecuali build GitHub Pages (mode demo browser)
 
 const Ctx = createContext(null);
 const KUNCI = 'mbgchain.akun';
@@ -29,9 +30,20 @@ export function SesiProvider({ children }) {
   const mulai = useCallback(async () => {
     setS({ status: 'memuat' });
     let kontrak;
-    try { kontrak = await ambilJson('/kontrak.json'); } catch { setS({ status: 'belumDeploy' }); return; }
-    const akunDemo = await ambilJson('/akun-demo.json').catch(() => null);
-    const klien = MBGChainClient.hubungkan(`${window.location.origin}/rpc`, kontrak);
+    let akunDemo;
+    let penyedia = `${window.location.origin}/rpc`;
+    if (siapkanChainBrowser) {
+      try {
+        ({ kontrak, akunDemo, provider: penyedia } = await siapkanChainBrowser((pesan) => setS({ status: 'memuat', pesan })));
+      } catch (e) {
+        setS({ status: 'putus', pesan: e.message });
+        return;
+      }
+    } else {
+      try { kontrak = await ambilJson('/kontrak.json'); } catch { setS({ status: 'belumDeploy' }); return; }
+      akunDemo = await ambilJson('/akun-demo.json').catch(() => null);
+    }
+    const klien = MBGChainClient.hubungkan(penyedia, kontrak);
     try {
       await segarkanJam(klien);
       await klien.kontrak.methods.admin().call(); // memastikan kontrak ada di jaringan ini

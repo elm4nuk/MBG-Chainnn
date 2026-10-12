@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useSesi } from '../lib/sesi.jsx';
 import { berandaUntuk } from '../lib/format.js';
-import { Galat, Ikon, InfoJaringan } from '../components/ui.jsx';
+import { Galat, Ikon, InfoJaringan, Pesan } from '../components/ui.jsx';
 
 const SANDI_DEMO = 'mbgchain';
 
 export default function Masuk() {
-  const { profil, masuk, akunDemo } = useSesi();
+  const { profil, masuk, akunDemo, kontrak } = useSesi();
   const nav = useNavigate();
   const [id, setId] = useState('');
   const [sandi, setSandi] = useState('');
@@ -66,6 +66,9 @@ export default function Masuk() {
 
       <section className="masuk-kartu" aria-labelledby="judul-masuk">
         <h2 id="judul-masuk">Masuk petugas</h2>
+        {kontrak?.jaringan === 'demo browser' && (
+          <Pesan jenis="info" ikon="info">Mode demo: blockchain berjalan di browser Anda. Transaksi sungguhan dicatat smart contract, tetapi data kembali ke awal saat halaman dimuat ulang.</Pesan>
+        )}
         <form className="form" onSubmit={kirim} noValidate>
           <div className="field">
             <label htmlFor="pid">ID petugas</label>

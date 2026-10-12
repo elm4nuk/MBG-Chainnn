@@ -12,3 +12,4 @@ tools/shots/
 !.env.example
 .cert/
 .DS_Store
+frontend/dist-pages/

@@ -24,6 +24,7 @@
     "app:host": "npm run dev -w frontend -- --host",
     "app:https": "MBG_HTTPS=1 npm run dev -w frontend -- --host",
     "app:build": "npm run build -w frontend",
+    "pages:build": "npm run compile && npm run build -w frontend -- --mode pages",
     "test:e2e": "node scripts/uji-e2e.js"
   },
   "dependencies": {

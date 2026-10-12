@@ -91,6 +91,16 @@ Satu aplikasi dan satu sumber data (smart contract) untuk semua ukuran layar; ha
 - **Bukti transaksi** menampilkan event, waktu, pelaku (akun penanda tangan transaksi), nomor blok, dan hash. Di halaman petugas bagian ini dilipat agar layar fokus pada tindakan.
 - Animasi hanya CSS (muncul ±220 ms, drawer, sheet, umpan balik transaksi) dan dimatikan otomatis bila sistem meminta *reduce motion*.
 
+## Demo online (GitHub Pages)
+
+https://elm4nuk.github.io/MBG-Chainnn/ menjalankan aplikasi yang sama tanpa server: blockchain Ganache berjalan **di browser pengunjung** (`frontend/src/lib/chainBrowser.js`). Saat halaman dibuka, kontrak MBGChain di-deploy dengan Web3.js lalu diisi data demo yang sama dengan `npm run seed` (`client/skenario-demo.js`), butuh beberapa detik.
+
+- Data hanya ada di tab tersebut dan kembali ke awal saat halaman dimuat ulang; setiap pengunjung punya chain sendiri.
+- Prototype klik Session 10 (bingkai iPhone) tetap ada di https://elm4nuk.github.io/MBG-Chainnn/prototype/.
+- Membuat ulang berkasnya: `npm run pages:build` → hasil di `frontend/dist-pages/`, lalu salin ke branch `gh-pages` (bersama folder `prototype/`).
+- Uji asap: `python tools/pages_smoke.py https://elm4nuk.github.io/MBG-Chainnn/` (login, sajikan, tolak, verifikasi, pantau, HP & desktop).
+- Untuk presentasi tetap disarankan `npm run demo:start` di laptop, karena tidak bergantung pada unduhan ±9 MB.
+
 ## Akun demo (jaringan lokal)
 
 | ID petugas | Nama | Organisasi | Peran di aplikasi |

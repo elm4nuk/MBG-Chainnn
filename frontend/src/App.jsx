@@ -14,17 +14,20 @@ import TataLetak from './components/TataLetak.jsx';
 import { NAV_PUBLIK, TABS_ADMIN, TABS_DAPUR, TABS_KURIR, TABS_PUSKESMAS, TABS_SEKOLAH } from './pages/tabs.js';
 
 function Gangguan() {
-  const { status, coba } = useSesi();
+  const { status, coba, pesan } = useSesi();
   const belum = status === 'belumDeploy';
+  const demoBrowser = import.meta.env.MODE === 'pages';
   return (
     <Halaman>
       <AppBar judul="MBG-Chain" />
       <div className="status-wrap" role="alert">
         <div className="badge-big bad"><Ikon n={belum ? 'info' : 'x'} /></div>
         <h2>{belum ? 'Kontrak belum di-deploy' : 'Tidak terhubung ke jaringan'}</h2>
-        <p>{belum
-          ? 'Jalankan npm run chain, lalu npm run deploy dan npm run seed di folder mbg-chain, kemudian muat ulang halaman ini.'
-          : 'Node blockchain di 127.0.0.1:8545 tidak menjawab atau kontrak tidak ditemukan. Pastikan npm run chain masih berjalan.'}</p>
+        <p>{demoBrowser
+          ? `Blockchain demo di browser gagal disiapkan${pesan ? `: ${pesan}` : '.'} Muat ulang halaman untuk mencoba lagi.`
+          : belum
+            ? 'Jalankan npm run chain, lalu npm run deploy dan npm run seed di folder mbg-chain, kemudian muat ulang halaman ini.'
+            : 'Node blockchain di 127.0.0.1:8545 tidak menjawab atau kontrak tidak ditemukan. Pastikan npm run chain masih berjalan.'}</p>
       </div>
       <div className="actions"><button type="button" className="btn primary block" onClick={coba}><Ikon n="refresh" />Coba lagi</button></div>
     </Halaman>
@@ -32,8 +35,8 @@ function Gangguan() {
 }
 
 function Siap({ children }) {
-  const { status } = useSesi();
-  if (status === 'memuat') return <Halaman><AppBar judul="MBG-Chain" /><div className="content"><Skeleton n={3} teks="Menghubungkan ke jaringan MBG-Chain…" /></div></Halaman>;
+  const { status, pesan } = useSesi();
+  if (status === 'memuat') return <Halaman><AppBar judul="MBG-Chain" /><div className="content"><Skeleton n={3} teks={pesan || 'Menghubungkan ke jaringan MBG-Chain…'} /></div></Halaman>;
   if (status !== 'siap') return <Gangguan />;
   return children;
 }
