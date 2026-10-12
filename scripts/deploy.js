@@ -1,12 +1,12 @@
-// Deploy MBGChain dengan Web3.js, lalu simpan alamat + ABI ke deployments/<jaringan>.json
+// Deploy MBGChain dengan viem, lalu simpan alamat + ABI ke deployments/<jaringan>.json
 // agar bisa dipakai front-end (React), script seed, dan script demo.
 //
 //   Lokal (default) : RPC_URL=http://127.0.0.1:8545  -> akun pertama node menjadi admin BGN
-//   Ganache GUI     : RPC_URL=http://127.0.0.1:7545
 //   Testnet Sepolia : isi RPC_URL dan PRIVATE_KEY di file .env (lihat .env.example)
 import fs from 'node:fs';
 import path from 'node:path';
-import { Web3 } from 'web3';
+import { createPublicClient, createWalletClient, defineChain, getAddress, http } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import { ROOT, bacaJson, muatEnv, namaJaringan, tulisJson } from './util.js';
 
 muatEnv();
@@ -17,44 +17,44 @@ if (!artefak) {
   process.exit(1);
 }
 
-const web3 = new Web3(RPC_URL);
-let admin;
+const publik = createPublicClient({ transport: http(RPC_URL, { retryCount: 0 }), pollingInterval: 250 });
+let chainId;
 try {
-  if (process.env.PRIVATE_KEY) {
-    const kunci = process.env.PRIVATE_KEY.startsWith('0x') ? process.env.PRIVATE_KEY : `0x${process.env.PRIVATE_KEY}`;
-    const akun = web3.eth.accounts.privateKeyToAccount(kunci);
-    web3.eth.accounts.wallet.add(akun);   // transaksi ditandatangani lokal oleh Web3.js
-    admin = akun.address;
-  } else {
-    [admin] = await web3.eth.getAccounts(); // akun yang dikelola node lokal
-  }
-} catch (e) {
+  chainId = await publik.getChainId();
+} catch {
   console.error(`Tidak bisa terhubung ke ${RPC_URL}. Sudah menjalankan "npm run chain"?`);
   process.exit(1);
 }
-
-const chainId = Number(await web3.eth.getChainId());
 const jaringan = namaJaringan(chainId);
-console.log(`Deploy MBGChain ke jaringan ${jaringan} (chainId ${chainId}) dari akun admin ${admin}`);
+const chain = defineChain({ id: chainId, name: jaringan, nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: [RPC_URL] } } });
+const dompet = createWalletClient({ chain, transport: http(RPC_URL, { retryCount: 0 }) });
 
-const deployTx = new web3.eth.Contract(artefak.abi).deploy({ data: artefak.bytecode });
-const gas = await deployTx.estimateGas({ from: admin });
-let txHash;
-const kontrak = await deployTx
-  .send({ from: admin, gas: String(Math.ceil(Number(gas) * 1.2)) })
-  .on('transactionHash', (h) => {
-    txHash = h;
-    console.log(`  transaksi dikirim : ${h}`);
-  });
-const receipt = await web3.eth.getTransactionReceipt(txHash);
+let admin;
+if (process.env.PRIVATE_KEY) {
+  const kunci = process.env.PRIVATE_KEY.startsWith('0x') ? process.env.PRIVATE_KEY : `0x${process.env.PRIVATE_KEY}`;
+  admin = privateKeyToAccount(kunci);                // transaksi ditandatangani lokal oleh viem
+} else {
+  admin = getAddress((await dompet.getAddresses())[0]); // akun yang dikelola node lokal
+}
+const alamatAdmin = typeof admin === 'string' ? admin : admin.address;
+console.log(`Deploy MBGChain ke jaringan ${jaringan} (chainId ${chainId}) dari akun admin ${alamatAdmin}`);
+
+const gas = await publik.estimateGas({ account: admin, data: artefak.bytecode });
+const txHash = await dompet.deployContract({ abi: artefak.abi, bytecode: artefak.bytecode, account: admin, gas: (gas * 12n) / 10n });
+console.log(`  transaksi dikirim : ${txHash}`);
+const receipt = await publik.waitForTransactionReceipt({ hash: txHash });
+if (receipt.status !== 'success' || !receipt.contractAddress) {
+  console.error('Deploy gagal dieksekusi di jaringan.');
+  process.exit(1);
+}
 
 const info = {
   jaringan,
   chainId,
   // URL RPC testnet (Alchemy/Infura) bisa berisi API key, jadi hanya alamat node lokal yang disimpan.
   ...(jaringan === 'lokal' && { rpcUrl: RPC_URL }),
-  address: kontrak.options.address,
-  admin,
+  address: getAddress(receipt.contractAddress),
+  admin: alamatAdmin,
   txHash,
   blockNumber: Number(receipt.blockNumber),
   gasUsed: Number(receipt.gasUsed),
@@ -70,8 +70,8 @@ if (jaringan === 'lokal' && fs.existsSync(path.join(ROOT, 'frontend'))) {
 }
 
 // Cek koneksi: baca kembali data dari kontrak yang baru di-deploy.
-const cek = new web3.eth.Contract(artefak.abi, info.address);
-const [adminTerbaca, batas] = await Promise.all([cek.methods.admin().call(), cek.methods.BATAS_KONSUMSI().call()]);
+const baca = (functionName) => publik.readContract({ address: info.address, abi: artefak.abi, functionName });
+const [adminTerbaca, batas] = await Promise.all([baca('admin'), baca('BATAS_KONSUMSI')]);
 console.log(`✔ MBGChain ter-deploy di ${info.address}`);
 console.log(`  blok ${info.blockNumber} · gas ${info.gasUsed.toLocaleString('id-ID')} · admin terbaca ${adminTerbaca}`);
 console.log(`  BATAS_KONSUMSI terbaca dari kontrak = ${Number(batas) / 3600} jam`);

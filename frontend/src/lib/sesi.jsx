@@ -1,4 +1,4 @@
-// Sesi aplikasi: koneksi ke smart contract (Web3.js lewat client/mbgchain.js), akun yang login, dan jam chain.
+// Sesi aplikasi: koneksi ke smart contract (viem lewat client/mbgchain.js), akun yang login, dan jam chain.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { MBGChainClient } from '@client';
 import { siapkanChainBrowser } from '@mode-chain'; // null kecuali build GitHub Pages (mode demo browser)
@@ -46,7 +46,7 @@ export function SesiProvider({ children }) {
     const klien = MBGChainClient.hubungkan(penyedia, kontrak);
     try {
       await segarkanJam(klien);
-      await klien.kontrak.methods.admin().call(); // memastikan kontrak ada di jaringan ini
+      await klien.admin(); // memastikan kontrak ada di jaringan ini
     } catch (e) {
       setS({ status: 'putus', kontrak, pesan: e.message });
       return;

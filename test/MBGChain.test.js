@@ -1,12 +1,10 @@
-// Unit test MBGChain di blockchain Ganache (in-process) memakai Web3.js.
+// Unit test MBGChain di blockchain Hardhat (in-process, jaringan "uji" di hardhat.config.js) memakai viem.
 // Jalankan: npm test
 import assert from 'node:assert/strict';
-import { Web3 } from 'web3';
+import { network } from 'hardhat';
+import { BaseError, ContractFunctionRevertedError, createPublicClient, createWalletClient, custom, getAddress, parseEventLogs } from 'viem';
 import { kompilasi } from '../scripts/compile.js';
-import { muatGanache } from '../scripts/util.js';
 import { MBGChainClient, KesalahanMBG, terjemahkanError } from '../client/mbgchain.js';
-
-const ganache = await muatGanache();
 
 const JENIS = { SPPG: 1, Mitra: 2, Sekolah: 3, Puskesmas: 4 };
 const STATUS = { Terdaftar: 0, SelesaiMasak: 1, DalamPerjalanan: 2, Diterima: 3, Disajikan: 4, Ditolak: 5 };
@@ -16,32 +14,42 @@ const ORG = { dapur: 1, mitra: 2, sekolah: 3, sekolahLain: 4, puskesmas: 5, dapu
 const MENU = 'Nasi, ayam teriyaki, tumis buncis, pisang';
 
 describe('MBGChain', function () {
-  let provider, web3, artefak, kontrak, A;
+  let provider, publik, dompet, artefak, alamat, A;
   const gasPerFungsi = {};
 
   // ---------------------------------------------------------------- helper
+  const panggilan = (dari, fungsi, args) => ({ address: alamat, abi: artefak.abi, functionName: fungsi, args, account: dari });
+  /** Kirim transaksi; hasil: { receipt, events: { NamaEvent: args } }. */
   async function tx(dari, fungsi, ...args) {
-    const metode = kontrak.methods[fungsi](...args);
-    const gas = await metode.estimateGas({ from: dari });
-    const r = await metode.send({ from: dari, gas: String(Math.ceil(Number(gas) * 1.2)) });
-    (gasPerFungsi[fungsi] ||= []).push(Number(r.gasUsed));
-    return r;
+    const p = panggilan(dari, fungsi, args);
+    const gas = await publik.estimateContractGas(p);
+    const hash = await dompet.writeContract({ ...p, gas: (gas * 12n) / 10n, chain: null });
+    const receipt = await publik.waitForTransactionReceipt({ hash });
+    (gasPerFungsi[fungsi] ||= []).push(Number(receipt.gasUsed));
+    return { receipt, events: Object.fromEntries(parseEventLogs({ abi: artefak.abi, logs: receipt.logs }).map((l) => [l.eventName, l.args])) };
   }
+  /** Nama custom error dari penolakan kontrak (viem). */
+  const namaError = (e) => (e instanceof BaseError ? e.walk((x) => x instanceof ContractFunctionRevertedError)?.data?.errorName : undefined);
   /** Simulasi transaksi (eth_call) dan pastikan kontrak menolak dengan custom error tertentu. */
-  async function ditolak(dari, fungsi, args, namaError) {
-    await assert.rejects(kontrak.methods[fungsi](...args).call({ from: dari }), (e) => {
-      assert.equal(e.innerError?.errorName, namaError);
+  async function ditolak(dari, fungsi, args, nama) {
+    await assert.rejects(publik.simulateContract(panggilan(dari, fungsi, args)), (e) => {
+      assert.equal(namaError(e), nama);
       return true;
     });
   }
-  const baca = (fungsi, ...args) => kontrak.methods[fungsi](...args).call();
+  /** Baca fungsi view; keluaran ganda dijadikan objek bernama (seperti struct). */
+  async function baca(fungsi, ...args) {
+    const hasil = await publik.readContract({ address: alamat, abi: artefak.abi, functionName: fungsi, args });
+    const keluaran = artefak.abi.find((x) => x.type === 'function' && x.name === fungsi).outputs;
+    return keluaran.length > 1 ? Object.fromEntries(keluaran.map((o, i) => [o.name, hasil[i]])) : hasil;
+  }
   async function majukan(menit) {
     await provider.request({ method: 'evm_increaseTime', params: [Math.round(menit * 60)] });
     await provider.request({ method: 'evm_mine', params: [] });
   }
   async function batchBaru(porsi = 120, sekolahId = ORG.sekolah) {
     const r = await tx(A.dapur, 'daftarkanBatch', sekolahId, MENU, porsi);
-    return Number(r.events.BatchDidaftarkan.returnValues.id);
+    return Number(r.events.BatchDidaftarkan.id);
   }
   /** Batch yang sudah dimasak, diambil kurir, dan diterima sekolah. */
   async function batchDiSekolah(porsi = 120) {
@@ -54,14 +62,16 @@ describe('MBGChain', function () {
 
   before(async function () {
     artefak = kompilasi();
-    provider = ganache.provider({ wallet: { deterministic: true }, logging: { quiet: true }, chain: { chainId: 1337 } });
-    web3 = new Web3(provider);
-    const akun = await web3.eth.getAccounts();
+    ({ provider } = await network.connect('uji'));
+    const transport = custom(provider, { retryCount: 0 }); // penolakan kontrak tidak perlu diulang
+    publik = createPublicClient({ transport, pollingInterval: 50 });
+    dompet = createWalletClient({ transport });
+    const akun = (await dompet.getAddresses()).map((x) => getAddress(x));
     A = { admin: akun[0], dapur: akun[1], kurir: akun[2], pic: akun[3], picLain: akun[4], puskesmas: akun[5], dapurLain: akun[6], sementara: akun[7], orangLuar: akun[9] };
 
-    const deploy = new web3.eth.Contract(artefak.abi).deploy({ data: artefak.bytecode });
-    const gas = await deploy.estimateGas({ from: A.admin });
-    kontrak = await deploy.send({ from: A.admin, gas: String(Math.ceil(Number(gas) * 1.2)) });
+    const gas = await publik.estimateGas({ account: A.admin, data: artefak.bytecode });
+    const hash = await dompet.deployContract({ abi: artefak.abi, bytecode: artefak.bytecode, account: A.admin, gas: (gas * 12n) / 10n, chain: null });
+    alamat = (await publik.waitForTransactionReceipt({ hash })).contractAddress;
     gasPerFungsi['(deploy)'] = [Number(gas)];
 
     await tx(A.admin, 'daftarkanOrganisasi', JENIS.SPPG, 'SPPG Cakung Barat');
@@ -82,7 +92,7 @@ describe('MBGChain', function () {
     const baris = Object.entries(gasPerFungsi).map(([f, g]) => ({
       fungsi: f, transaksi: g.length, 'gas rata-rata': Math.round(g.reduce((a, b) => a + b, 0) / g.length),
     }));
-    console.log('\n  Pemakaian gas per fungsi (Ganache, solc 0.8.30, optimizer 200):');
+    console.log('\n  Pemakaian gas per fungsi (Hardhat, hardfork shanghai, solc 0.8.30, optimizer 200):');
     console.table(baris);
   });
 
@@ -129,7 +139,7 @@ describe('MBGChain', function () {
       const w = [b.waktuDaftar, b.waktuMasak, b.waktuDiambil, b.waktuDiterima, b.waktuSelesai].map(Number);
       assert.ok(w.every((x, i) => i === 0 || x >= w[i - 1]), 'waktu tiap tahap berurutan');
       assert.ok(w[4] - w[1] >= 105 * 60, 'jarak masak sampai disajikan tercatat');
-      assert.equal(Number(r.events.BatchDisajikan.returnValues.porsiDisajikan), 118);
+      assert.equal(Number(r.events.BatchDisajikan.porsiDisajikan), 118);
     });
 
     it('urutan status tidak bisa dilompati', async function () {
@@ -181,7 +191,7 @@ describe('MBGChain', function () {
       let k = await baca('cekKelayakan', id);
       assert.equal(Number(k.status), KELAYAKAN.BelumDimasak);
       const r = await tx(A.dapur, 'catatSelesaiMasak', id);
-      const batas = Number(r.events.BatchSelesaiMasak.returnValues.batasKonsumsi);
+      const batas = Number(r.events.BatchSelesaiMasak.batasKonsumsi);
 
       await majukan(170);                                    // 2 jam 50 menit
       k = await baca('cekKelayakan', id);
@@ -207,10 +217,7 @@ describe('MBGChain', function () {
     it('penyajian setelah batas ditolak kontrak (BatasWaktuTerlewati)', async function () {
       const id = await batchDiSekolah();
       await majukan(241);                                    // 4 jam 1 menit
-      await assert.rejects(kontrak.methods.catatPenyajian(id, 120).call({ from: A.pic }), (e) => {
-        assert.equal(e.innerError?.errorName, 'BatasWaktuTerlewati');
-        return true;
-      });
+      await ditolak(A.pic, 'catatPenyajian', [id, 120], 'BatasWaktuTerlewati');
       assert.equal(Number((await baca('lihatBatch', id)).status), STATUS.Diterima, 'status tidak berubah');
     });
 
@@ -222,7 +229,7 @@ describe('MBGChain', function () {
       const b = await baca('lihatBatch', id);
       assert.equal(Number(b.status), STATUS.Ditolak);
       assert.equal(Number(b.alasanTolak), ALASAN.LewatBatasWaktu);
-      assert.equal(r.events.BatchDitolak.returnValues.catatan, 'Tiba 10.20, lewat batas');
+      assert.equal(r.events.BatchDitolak.catatan, 'Tiba 10.20, lewat batas');
     });
 
     it('penolakan karena kondisi bisa kapan saja, tetapi alasan wajib diisi', async function () {
@@ -256,17 +263,17 @@ describe('MBGChain', function () {
 
     it('siapa pun bisa membaca data batch tanpa akun terdaftar', async function () {
       const id = await batchBaru();
-      const b = await kontrak.methods.lihatBatch(id).call({ from: A.orangLuar });
+      const b = await publik.readContract({ address: alamat, abi: artefak.abi, functionName: 'lihatBatch', args: [id], account: A.orangLuar });
       assert.equal(b.menu, MENU);
       await ditolak(A.orangLuar, 'lihatBatch', [9999], 'BatchTidakDitemukan');
     });
   });
 
   // ================================================================ 5
-  describe('Klien Web3.js untuk front-end', function () {
+  describe('Klien viem untuk front-end', function () {
     let klien;
     before(function () {
-      klien = MBGChainClient.hubungkan(provider, { address: kontrak.options.address, abi: artefak.abi });
+      klien = MBGChainClient.hubungkan(provider, { address: alamat, abi: artefak.abi });
     });
 
     it('membaca peran dan organisasi akun saat masuk', async function () {
@@ -333,7 +340,7 @@ describe('MBGChain', function () {
     });
 
     it('melaporkan gagal jaringan bila node tidak bisa dihubungi', async function () {
-      const putus = MBGChainClient.hubungkan('http://127.0.0.1:9', { address: kontrak.options.address, abi: artefak.abi });
+      const putus = MBGChainClient.hubungkan('http://127.0.0.1:9', { address: alamat, abi: artefak.abi });
       await assert.rejects(putus.batch(1), (e) => e instanceof KesalahanMBG && e.jenis === 'jaringan');
     });
   });

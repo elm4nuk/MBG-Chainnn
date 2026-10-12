@@ -25,7 +25,7 @@ function SimulasiWaktu() {
   return (
     <section className="card">
       <h3>Alat demo · jaringan lokal</h3>
-      <p className="help">Memajukan jam blockchain Ganache untuk memperlihatkan batch yang mendekati atau melewati batas 4 jam. Tidak tersedia di jaringan sungguhan.</p>
+      <p className="help">Memajukan jam blockchain lokal untuk memperlihatkan batch yang mendekati atau melewati batas 4 jam. Tidak tersedia di jaringan sungguhan.</p>
       <div className="row">
         <button type="button" className="btn secondary sm" disabled={proses} onClick={() => maju(15)}><Ikon n="clock" />+15 menit</button>
         <button type="button" className="btn secondary sm" disabled={proses} onClick={() => maju(60)}><Ikon n="clock" />+1 jam</button>

@@ -5,7 +5,7 @@
   "description": "MBG-Chain: pelacakan batch Makan Bergizi Gratis dari dapur SPPG sampai disajikan di sekolah (Solidity + Web3.js)",
   "type": "module",
   "engines": {
-    "node": ">=20.19"
+    "node": ">=22.13"
   },
   "workspaces": [
     "frontend"
@@ -28,12 +28,12 @@
     "test:e2e": "node scripts/uji-e2e.js"
   },
   "dependencies": {
-    "web3": "4.16.0"
+    "viem": "2.56.9"
   },
   "devDependencies": {
-    "ganache": "7.9.2",
     "mocha": "12.0.3",
-    "solc": "0.8.30"
+    "solc": "0.8.30",
+    "hardhat": "3.18.0"
   },
   "license": "MIT"
 }

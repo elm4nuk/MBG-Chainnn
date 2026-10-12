@@ -1,4 +1,4 @@
-"""Uji end-to-end aplikasi MBG-Chain (React + Web3.js) di Chromium, terhadap blockchain Ganache lokal.
+"""Uji end-to-end aplikasi MBG-Chain (React + viem) di Chromium, terhadap blockchain Hardhat lokal.
 Menjalankan alur semua peran dan menyimpan screenshot ke tools/shots/.
 
 Persiapan (data harus segar):

@@ -19,14 +19,12 @@ export const NAMA_EVENT = {
 export function useJejak(kode) {
   const { klien } = useSesi();
   return useMuat(async () => {
-    const jejak = await klien.jejakAudit(kode);
+    const jejak = await klien.jejakAudit(kode); // sudah memuat `dari`: akun penanda tangan transaksi
     const profil = new Map();
     return Promise.all(jejak.map(async (e) => {
-      const tx = await klien.web3.eth.getTransaction(e.txHash);
-      const dari = tx?.from;
-      if (dari && !profil.has(dari)) profil.set(dari, klien.profil(dari).catch(() => null));
-      const p = dari ? await profil.get(dari) : null;
-      return { ...e, dari, pelaku: p?.nama || '', organisasi: p?.organisasi || '' };
+      if (e.dari && !profil.has(e.dari)) profil.set(e.dari, klien.profil(e.dari).catch(() => null));
+      const p = e.dari ? await profil.get(e.dari) : null;
+      return { ...e, pelaku: p?.nama || '', organisasi: p?.organisasi || '' };
     }));
   }, [kode]);
 }

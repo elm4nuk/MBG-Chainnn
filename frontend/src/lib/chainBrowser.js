@@ -1,7 +1,8 @@
 // Mode demo browser (build GitHub Pages): blockchain Ganache berjalan di browser pengunjung, tanpa server.
-// Saat halaman dibuka: chain baru dibuat, MBGChain di-deploy dengan Web3.js, lalu data demo yang sama dengan
+// Saat halaman dibuka: chain baru dibuat, MBGChain di-deploy dengan viem, lalu data demo yang sama dengan
 // `npm run seed` diisi. Data hanya ada di tab ini dan kembali ke awal saat halaman dimuat ulang.
-import { Web3 } from 'web3';
+// Ganache dipakai di sini karena Hardhat dan Anvil tidak bisa berjalan di browser; chain lokal & test memakai Hardhat.
+import { createPublicClient, createWalletClient, custom } from 'viem';
 import ganacheUrl from 'ganache/dist/web/ganache.min.js?url';
 import artefak from '@artefak';
 import { isiDataDemo } from '@skenario';
@@ -29,17 +30,19 @@ async function siapkan(kabar) {
     chain: { chainId: 1337, networkId: 1337, time: new Date(Date.now() - 5 * 60 * 60 * 1000) },
     logging: { quiet: true },
   });
-  const web3 = new Web3(provider);
-  const [admin] = await web3.eth.getAccounts();
+  const transport = custom(provider, { retryCount: 0 });
+  const publik = createPublicClient({ transport, pollingInterval: 100 });
+  const dompet = createWalletClient({ transport });
+  const [admin] = await dompet.getAddresses();
 
   kabar('Men-deploy smart contract MBGChain…');
-  const deployTx = new web3.eth.Contract(artefak.abi).deploy({ data: artefak.bytecode });
-  const gas = await deployTx.estimateGas({ from: admin });
-  const kontrakWeb3 = await deployTx.send({ from: admin, gas: String(gas) });
-  const address = kontrakWeb3.options.address;
+  // Gas wajib diisi: tanpa itu Ganache memakai batas bawaan 90.000 (terlalu kecil untuk deploy).
+  const gas = await publik.estimateGas({ account: admin, data: artefak.bytecode });
+  const hash = await dompet.deployContract({ abi: artefak.abi, bytecode: artefak.bytecode, account: admin, gas: (gas * 12n) / 10n, chain: null });
+  const { contractAddress: address } = await publik.waitForTransactionReceipt({ hash });
 
   kabar('Mengisi data demo (organisasi, petugas, 6 batch)…');
-  const { akunDemo } = await isiDataDemo(web3, new web3.eth.Contract(artefak.abi, address));
+  const { akunDemo } = await isiDataDemo(provider, address, artefak.abi);
 
   // Seperti scripts/chain.js: blok kosong tiap 5 detik agar jam chain terus berjalan.
   setInterval(() => provider.request({ method: 'evm_mine', params: [] }).catch(() => {}), 5000);

@@ -6,7 +6,7 @@ import solc from 'solc';
 import { ROOT, tulisJson } from './util.js';
 
 const NAMA = 'MBGChain';
-const EVM_VERSION = 'paris'; // aman untuk Ganache GUI/CLI, Hardhat node, dan testnet Sepolia
+const EVM_VERSION = 'paris'; // aman untuk Hardhat node, Ganache (demo browser), dan testnet Sepolia
 
 export function kompilasi() {
   const sumber = fs.readFileSync(path.join(ROOT, 'contracts', `${NAMA}.sol`), 'utf8');

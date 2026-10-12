@@ -32,30 +32,3 @@ export function tulisJson(rel, data) {
 export function namaJaringan(chainId) {
   return { 1337: 'lokal', 31337: 'lokal', 11155111: 'sepolia' }[Number(chainId)] || `chain-${chainId}`;
 }
-
-/** Menjalankan RPC khusus jaringan lokal (Ganache/Hardhat), mis. evm_increaseTime. */
-export function rpc(web3, method, params = []) {
-  return web3.requestManager.send({ method, params });
-}
-
-/**
- * Memuat Ganache tanpa peringatan "µWS is not compatible" yang muncul di Node >= 22.
- * Peringatan itu tidak berpengaruh: Ganache otomatis memakai server bawaan Node.js.
- */
-export async function muatGanache() {
-  const asli = console.warn;
-  console.warn = (...isi) => {
-    if (!/µWS|Falling back to a NodeJS/.test(String(isi[0]))) asli(...isi);
-  };
-  try {
-    return (await import('ganache')).default;
-  } finally {
-    console.warn = asli;
-  }
-}
-
-/** Memajukan jam blockchain lokal (hanya untuk data demo & pengujian). */
-export async function majukanWaktu(web3, menit) {
-  await rpc(web3, 'evm_increaseTime', [Math.round(menit * 60)]);
-  await rpc(web3, 'evm_mine');
-}

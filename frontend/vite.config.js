@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => {
     },
     server: { port: Number(env.APP_PORT || process.env.APP_PORT || 5173), https, proxy },
     preview: { port: 4173, https, proxy },
-    // web3.js memang besar (~1 MB); wajar untuk prototype. Build Pages ditulis ke folder terpisah.
+    // Build Pages ditulis ke folder terpisah.
     build: { chunkSizeWarningLimit: 1200, ...(pages ? { outDir: 'dist-pages', emptyOutDir: true } : {}) },
   };
 });

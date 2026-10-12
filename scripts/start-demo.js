@@ -51,7 +51,7 @@ function tungguSelesai(child, nama) {
 async function tungguRpc(child, timeoutMs = 20_000) {
   const mulai = Date.now();
   while (Date.now() - mulai < timeoutMs) {
-    if (child.exitCode !== null) throw new Error('Ganache berhenti sebelum RPC siap.');
+    if (child.exitCode !== null) throw new Error('Blockchain lokal (Hardhat) berhenti sebelum RPC siap.');
     try {
       const res = await fetch(RPC_URL, {
         method: 'POST',
@@ -108,7 +108,7 @@ try {
   if (rpcTerpakai) throw new Error(`Port RPC ${rpcPort} sedang dipakai. Hentikan proses tersebut sendiri; launcher tidak akan membunuhnya.`);
   if (appTerpakai) throw new Error(`Port aplikasi ${APP_PORT} sedang dipakai. Hentikan proses tersebut sendiri; launcher tidak akan membunuhnya.`);
 
-  console.log(`\n1/4 Menyalakan Ganache di ${RPC_URL}`);
+  console.log(`\n1/4 Menyalakan blockchain lokal (Hardhat) di ${RPC_URL}`);
   const chain = jalankan(process.execPath, [path.join(ROOT, 'scripts/chain.js')], { env: { ...process.env, PORT: String(rpcPort) } });
   const chainId = await tungguRpc(chain);
   console.log(`\nRPC siap (chainId ${Number.parseInt(chainId, 16)}).`);

@@ -1,4 +1,4 @@
-// Demo alur kritis PIC sekolah lewat klien Web3.js (client/mbgchain.js), tanpa UI.
+// Demo alur kritis PIC sekolah lewat klien viem (client/mbgchain.js), tanpa UI.
 // Membuktikan koneksi aplikasi -> kontrak: baca data, kirim transaksi, dan penolakan aturan 4 jam.
 // Jalankan setelah: npm run chain → npm run deploy → npm run seed  (demo ini mengubah data seed).
 import { bacaJson } from './util.js';

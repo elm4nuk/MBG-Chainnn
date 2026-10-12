@@ -1,8 +1,8 @@
 // Mengisi data demo ke kontrak di jaringan lokal: organisasi, petugas, dan 6 batch di berbagai tahap.
 // Skenario meniru prototype UI (Session 10): pada "sekarang", batch B-0001 sudah lewat batas 25 menit,
 // B-0002 tersisa 45 menit, dan B-0003 tersisa 1 jam 35 menit.
-// Hanya untuk jaringan lokal (Ganache/Hardhat) karena memakai evm_increaseTime untuk memajukan jam.
-import { Web3 } from 'web3';
+// Hanya untuk jaringan lokal (Hardhat) karena memakai evm_increaseTime untuk memajukan jam.
+import { createPublicClient, http } from 'viem';
 import { bacaJson, tulisJson } from './util.js';
 import { MBGChainClient } from '../client/mbgchain.js';
 import { ORGANISASI, isiDataDemo } from '../client/skenario-demo.js';
@@ -12,15 +12,14 @@ if (!dep) {
   console.error('deployments/lokal.json belum ada. Jalankan: npm run chain, lalu npm run deploy');
   process.exit(1);
 }
-const web3 = new Web3(dep.rpcUrl);
-const kontrak = new web3.eth.Contract(dep.abi, dep.address);
-if (Number(await kontrak.methods.jumlahOrganisasi().call()) > 0) {
+const publik = createPublicClient({ transport: http(dep.rpcUrl, { retryCount: 0 }) });
+if (Number(await publik.readContract({ address: dep.address, abi: dep.abi, functionName: 'jumlahOrganisasi' })) > 0) {
   console.error('Data demo sudah ada. Untuk mengulang: hentikan chain, lalu npm run chain → npm run deploy → npm run seed');
   process.exit(1);
 }
 
 // Skenario yang sama dipakai mode demo browser (GitHub Pages), jadi data demo lokal dan online selalu sama.
-const { akunDemo, idBatch } = await isiDataDemo(web3, kontrak);
+const { akunDemo, idBatch } = await isiDataDemo(dep.rpcUrl, dep.address, dep.abi);
 
 // Simpan akun demo untuk layar Masuk di front-end.
 tulisJson('deployments/akun-demo.json', akunDemo);

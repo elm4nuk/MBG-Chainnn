@@ -12,7 +12,7 @@ Buka **Terminal**: ⌘ Space → ketik `Terminal` → Enter. Cek Node.js:
 node -v
 ```
 
-Butuh **v20.19 atau lebih baru** (yang sudah dites: v22). Kalau muncul `command not found` atau versinya lebih lama, unduh installer `node-v22.x.x.pkg` dari https://nodejs.org/dist/latest-v22.x/, jalankan, lalu tutup dan buka lagi Terminal.
+Butuh **v22.13 atau lebih baru** (yang sudah dites: v22.23). Kalau muncul `command not found` atau versinya lebih lama, unduh installer `node-v22.x.x.pkg` dari https://nodejs.org/dist/latest-v22.x/, jalankan, lalu tutup dan buka lagi Terminal.
 
 Ekstrak zip project (klik dua kali) atau `git clone`, lalu:
 
