@@ -1,0 +1,16 @@
+
+> mbg-chain@0.1.0 seed
+> node scripts/seed.js
+
+✔ Data demo terisi: 6 organisasi, 7 petugas, 6 batch
+  jam chain sekarang 00.06 · akun login demo di deployments/akun-demo.json
+┌─────────┬──────────┬─────────────────────┬────────────────────┬───────────────────┬──────────────────────────┐
+│ (index) │ batch    │ sekolah             │ status             │ kelayakan         │ batas konsumsi           │
+├─────────┼──────────┼─────────────────────┼────────────────────┼───────────────────┼──────────────────────────┤
+│ 0       │ 'B-0001' │ 'SDN Rawa Indah 03' │ 'Diterima'         │ 'Kedaluwarsa'     │ '23.41 · lewat 25 menit' │
+│ 1       │ 'B-0002' │ 'SDN Rawa Indah 03' │ 'Diterima'         │ 'Mendekati batas' │ '00.51 · sisa 0 j 45 m'  │
+│ 2       │ 'B-0003' │ 'SDN Rawa Indah 03' │ 'Diterima'         │ 'Aman'            │ '01.41 · sisa 1 j 35 m'  │
+│ 3       │ 'B-0004' │ 'SDN Rawa Indah 03' │ 'Dalam perjalanan' │ 'Aman'            │ '03.31 · sisa 3 j 25 m'  │
+│ 4       │ 'B-0005' │ 'SDN Rawa Indah 05' │ 'Disajikan'        │ '—'               │ '—'                      │
+│ 5       │ 'B-0006' │ 'SDN Rawa Indah 03' │ 'Terdaftar'        │ 'Belum dimasak'   │ '—'                      │
+└─────────┴──────────┴─────────────────────┴────────────────────┴───────────────────┴──────────────────────────┘

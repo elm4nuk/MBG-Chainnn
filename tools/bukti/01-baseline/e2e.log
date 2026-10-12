@@ -1,0 +1,26 @@
+LULUS  Masuk: kata sandi salah ditolak
+LULUS  Beranda PIC: peringatan batch lewat batas & mendekati batas tampil — 2 banner
+LULUS  Form penyajian: porsi melebihi yang diterima ditolak di form
+LULUS  Sajikan B-0002 (118 porsi): Pending → Confirmed, hash & blok tampil
+LULUS  Detail B-0001 kedaluwarsa: tombol Sajikan nonaktif
+LULUS  Tolak B-0001 (lewat batas 4 jam): tercatat
+LULUS  Jaringan terputus saat konfirmasi: layar "Pencatatan gagal"
+LULUS  Coba lagi setelah jaringan pulih: penerimaan B-0004 tercatat
+LULUS  Pindai batch sekolah lain (B-0005): ditolak di layar pindai
+LULUS  Kode manual "b3" dikenali sebagai B-0003
+LULUS  Jam chain dimajukan 2 jam sebelum konfirmasi: kontrak menolak (BatasWaktuTerlewati)
+LULUS  Lanjut "Catat penolakan" dari layar ditolak sistem: B-0003 ditolak
+LULUS  Lapor insiden B-0002 oleh PIC: tercatat
+LULUS  Dapur mendaftarkan batch baru: B-0007 terdaftar
+LULUS  Dapur mencatat selesai masak B-0007: hitungan 4 jam dimulai
+LULUS  Kurir mengambil B-0007: serah terima ditandatangani kurir
+LULUS  Petugas Puskesmas melaporkan insiden B-0002
+LULUS  Admin BGN mendaftarkan organisasi baru (ID 7)
+LULUS  Admin BGN mendaftarkan petugas baru (Wulan, SDN Pulo Gebang 06)
+LULUS  Admin BGN menonaktifkan petugas (Yusuf)
+LULUS  Petugas nonaktif ditolak saat masuk (dibaca dari kontrak)
+LULUS  Verifikasi publik B-0002 tanpa login: riwayat + bukti transaksi tampil — 7 event
+LULUS  Verifikasi kode yang tidak ada: pesan "Batch tidak ditemukan"
+LULUS  Pantau pengawas: ringkasan & daftar semua batch tampil
+
+24/24 langkah lulus dalam 37 detik

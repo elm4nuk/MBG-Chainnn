@@ -1,0 +1,14 @@
+node_modules/
+build/
+deployments/lokal.json
+deployments/akun-demo.json
+.env
+_exp/
+frontend/dist/
+frontend/public/kontrak.json
+frontend/public/akun-demo.json
+tools/shots/
+.env.*
+!.env.example
+.cert/
+.DS_Store

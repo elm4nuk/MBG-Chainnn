@@ -1,0 +1,16 @@
+
+> mbg-chain@0.1.0 deploy
+> npm run compile && node scripts/deploy.js
+
+
+> mbg-chain@0.1.0 compile
+> node scripts/compile.js
+
+✔ MBGChain dikompilasi dengan solc 0.8.30+commit.73712a01.Emscripten.clang (EVM paris)
+  41 entri ABI · bytecode runtime 8489 byte → build/MBGChain.json
+Deploy MBGChain ke jaringan lokal (chainId 1337) dari akun admin 0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1
+  transaksi dikirim : 0x004883549fd180624a303b507caf291a196bcb579b6b8f749d91bda927b7264c
+✔ MBGChain ter-deploy di 0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab
+  blok 1 · gas 1.886.252 · admin terbaca 0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1
+  BATAS_KONSUMSI terbaca dari kontrak = 4 jam
+  alamat + ABI disimpan di deployments/lokal.json (+ frontend/public/kontrak.json)

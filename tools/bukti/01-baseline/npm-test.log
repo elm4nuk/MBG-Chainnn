@@ -1,0 +1,64 @@
+
+> mbg-chain@0.1.0 test
+> npm run compile && mocha --timeout 60000
+
+
+> mbg-chain@0.1.0 compile
+> node scripts/compile.js
+
+✔ MBGChain dikompilasi dengan solc 0.8.30+commit.73712a01.Emscripten.clang (EVM paris)
+  41 entri ABI · bytecode runtime 8489 byte → build/MBGChain.json
+
+
+  MBGChain
+    Pendaftaran peserta jaringan (admin BGN)
+      ✔ akun yang men-deploy kontrak menjadi admin
+      ✔ selain admin tidak bisa mendaftarkan organisasi atau petugas
+      ✔ organisasi dan petugas harus valid
+      ✔ petugas yang dinonaktifkan tidak bisa mencatat lagi
+    Alur batch dari dapur sampai disajikan
+      ✔ mencatat setiap titik serah terima beserta pelaku dan waktunya (57ms)
+      ✔ urutan status tidak bisa dilompati (38ms)
+      ✔ hanya peran yang tepat yang bisa mencatat tiap tahap
+      ✔ dapur atau sekolah lain tidak bisa mencatat batch yang bukan miliknya
+      ✔ jumlah porsi divalidasi di setiap tahap (42ms)
+    Aturan batas konsumsi 4 jam
+      ✔ status kelayakan berubah Aman → Mendekati batas → Kedaluwarsa
+      ✔ penyajian sebelum batas diterima kontrak (45ms)
+      ✔ penyajian setelah batas ditolak kontrak (BatasWaktuTerlewati) (38ms)
+      ✔ alasan "lewat batas" hanya sah setelah batch benar-benar kedaluwarsa (49ms)
+      ✔ penolakan karena kondisi bisa kapan saja, tetapi alasan wajib diisi (49ms)
+      ✔ batch yang sudah disajikan atau ditolak tidak bisa dicatat ulang (50ms)
+    Insiden dan keterbukaan data
+      ✔ insiden hanya dari sekolah tujuan atau Puskesmas, setelah batch diterima (77ms)
+      ✔ siapa pun bisa membaca data batch tanpa akun terdaftar
+    Klien Web3.js untuk front-end
+      ✔ membaca peran dan organisasi akun saat masuk
+      ✔ menampilkan batch lengkap dengan status kelayakan dan riwayat (93ms)
+      ✔ mengirim transaksi dengan tahap memeriksa → menunggu → tercatat (49ms)
+      ✔ menerjemahkan penolakan kontrak menjadi pesan untuk pengguna (39ms)
+      ✔ menyediakan daftar organisasi, petugas, dan semua batch untuk admin & pengawas (76ms)
+      ✔ alat demo dapat memajukan jam blockchain lokal
+      ✔ mengenali pesan gagal jaringan dari Node maupun browser
+      ✔ melaporkan gagal jaringan bila node tidak bisa dihubungi
+
+  Pemakaian gas per fungsi (Ganache, solc 0.8.30, optimizer 200):
+┌─────────┬───────────────────────┬───────────┬───────────────┐
+│ (index) │ fungsi                │ transaksi │ gas rata-rata │
+├─────────┼───────────────────────┼───────────┼───────────────┤
+│ 0       │ '(deploy)'            │ 1         │ 1886252       │
+│ 1       │ 'daftarkanOrganisasi' │ 6         │ 78162         │
+│ 2       │ 'daftarkanPetugas'    │ 7         │ 72534         │
+│ 3       │ 'nonaktifkanPetugas'  │ 1         │ 28089         │
+│ 4       │ 'daftarkanBatch'      │ 17        │ 171967        │
+│ 5       │ 'catatSelesaiMasak'   │ 15        │ 42854         │
+│ 6       │ 'ambilBatch'          │ 14        │ 40163         │
+│ 7       │ 'terimaBatch'         │ 11        │ 60390         │
+│ 8       │ 'catatPenyajian'      │ 4         │ 62749         │
+│ 9       │ 'tolakBatch'          │ 2         │ 65496         │
+│ 10      │ 'laporkanInsiden'     │ 2         │ 37560         │
+└─────────┴───────────────────────┴───────────┴───────────────┘
+
+
+  25 passing (2s)
+

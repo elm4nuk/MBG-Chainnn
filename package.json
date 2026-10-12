@@ -1,0 +1,38 @@
+{
+  "name": "mbg-chain",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MBG-Chain: pelacakan batch Makan Bergizi Gratis dari dapur SPPG sampai disajikan di sekolah (Solidity + Web3.js)",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "compile": "node scripts/compile.js",
+    "test": "npm run compile && mocha --timeout 60000",
+    "chain": "node scripts/chain.js",
+    "deploy": "npm run compile && node scripts/deploy.js",
+    "seed": "node scripts/seed.js",
+    "demo": "node scripts/demo.js",
+    "demo:start": "node scripts/start-demo.js",
+    "demo:start:https": "MBG_HTTPS=1 node scripts/start-demo.js",
+    "cert:dev": "node scripts/create-dev-cert.js",
+    "app": "npm run dev -w frontend",
+    "app:host": "npm run dev -w frontend -- --host",
+    "app:https": "MBG_HTTPS=1 npm run dev -w frontend -- --host",
+    "app:build": "npm run build -w frontend",
+    "test:e2e": "node scripts/uji-e2e.js"
+  },
+  "dependencies": {
+    "web3": "4.16.0"
+  },
+  "devDependencies": {
+    "ganache": "7.9.2",
+    "mocha": "12.0.3",
+    "solc": "0.8.30"
+  },
+  "license": "MIT"
+}

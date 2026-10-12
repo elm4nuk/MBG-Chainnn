@@ -1,0 +1,20 @@
+
+MBG-Chain lokal berjalan di http://127.0.0.1:8545 (chainId 1337, blok baru minimal tiap 5 detik)
+
+┌─────────┬──────────────────────────────────────────────┬──────────────────────────────────────┐
+│ (index) │ alamat                                       │ peran                                │
+├─────────┼──────────────────────────────────────────────┼──────────────────────────────────────┤
+│ 0       │ '0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1' │ 'Admin BGN (deployer)'               │
+│ 1       │ '0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0' │ 'Petugas dapur · SPPG Cakung Barat'  │
+│ 2       │ '0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b' │ 'Kurir Budi · Mitra Logistik Cakung' │
+│ 3       │ '0xE11BA2b4D45Eaed5996Cd0823791E0C93114882d' │ 'Kurir Rudi · Mitra Logistik Cakung' │
+│ 4       │ '0xd03ea8624C8C5987235048901fB614fDcA89b117' │ 'PIC Sinta · SDN Rawa Indah 03'      │
+│ 5       │ '0x95cED938F7991cd0dFcb48F0a06a40FA1aF46EBC' │ 'PIC Dimas · SDN Rawa Indah 05'      │
+│ 6       │ '0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9' │ 'Petugas · Puskesmas Cakung'         │
+│ 7       │ '0x28a8746e75304c0780E011BEd21C72cD78cd535E' │ 'Petugas dapur · SPPG Pulo Gebang'   │
+│ 8       │ '0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E' │ '(cadangan)'                         │
+│ 9       │ '0x1dF62f291b2E969fB0849d99D9Ce41e2F137006e' │ '(cadangan)'                         │
+└─────────┴──────────────────────────────────────────────┴──────────────────────────────────────┘
+Langkah berikutnya di terminal lain:  npm run deploy  →  npm run seed  →  npm run app
+Tekan Ctrl+C untuk berhenti (data chain lokal akan hilang).
+
